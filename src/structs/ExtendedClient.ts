@@ -27,7 +27,7 @@ export class ExtendedClient extends Client {
     public start(){
         this.registerModules();
         this.registerEvents();
-        this.login('MTMxMjE1ODg1NzE0NDgyODAwNw.Gps7vC.uSkHXtcLt3RsrJzM4LviD1XbSe7fz6iGjFW67Y');
+        this.login('id do bot');
     }
 
     private registerCommands(commands: Array<ApplicationCommandDataResolvable>) {
