@@ -87,8 +87,8 @@ export default new Command({
             ],
         },
     ],
-    async run({ interaction, client }) {
-        if (interaction.options.get("tipo")?.value !== "times") return;
+    async run({ interaction, client, options }) {
+        if (options.get("tipo")?.value !== "times") return;
 
         if (!interaction.guildId) {
             await interaction.reply("Não foi possível obter a informação da guild.");

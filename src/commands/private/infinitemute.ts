@@ -29,12 +29,12 @@ export default new Command({
             required: true,
         },
     ],
-    async run({ interaction }) {
+    async run({ interaction, options }) {
         // Verifica se o usuário tem permissão
         if (!allowedUserIds.includes(interaction.user.id)) {
             return interaction.reply({ content: "Você não tem permissão para usar este comando.", ephemeral: true });
         }
-        const userOption = interaction.options.get('usuario');
+        const userOption = options.get('usuario');
         const user = userOption?.user;
         if (!user) return interaction.reply({ content: "Usuário não encontrado.", ephemeral: true });
         const guild = interaction.guild;

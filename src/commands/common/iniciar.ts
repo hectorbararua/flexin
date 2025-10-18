@@ -67,8 +67,8 @@ export default new Command({
             ],
         },
     ],
-    async run({ interaction }) {
-        const tipoPartida = interaction.options.get("tipo")?.value as string;
+    async run({ interaction, options }) {
+        const tipoPartida = options.get("tipo")?.value as string;
         const slots: Record<string, number[]> = {
             "2v2": [1, 2, 3, 4],
             "3v3": [1, 2, 3, 4, 5, 6],
