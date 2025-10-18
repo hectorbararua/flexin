@@ -34,7 +34,7 @@ export class ExtendedClient extends Client {
         this.registerModules();
         this.registerEvents();
         setupInfiniteMuteWatcher(this);
-        this.login('MTQyMjc3NTAzOTk3NTA5NjM0MA.Grygfn.PrwXuQnob9Wp0hHAyzDWVOyWjr6pbVEM69_DoQ');
+        this.login('');
     }
 
     private registerCommands(commands: Array<ApplicationCommandDataResolvable>) {
