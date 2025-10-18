@@ -4,6 +4,7 @@ import { CommandType, ComponentsButton, ComponentsModal, ComponentsSelect } from
 import fs from 'fs';
 import path from 'path';
 import { EventType } from "./types/events";
+import { setupInfiniteMuteWatcher } from "../lib/infiniteMuteWatcher";
 
 const fileCondition = (fileName: string) => fileName.endsWith('.ts') || fileName.endsWith('.js')
 
@@ -16,7 +17,12 @@ export class ExtendedClient extends Client {
 
     constructor() { 
         super({
-            intents: Object.keys(IntentsBitField.Flags) as BitFieldResolvable<GatewayIntentsString, number>,
+            intents: [
+                IntentsBitField.Flags.Guilds,
+                IntentsBitField.Flags.GuildMembers,
+                IntentsBitField.Flags.GuildVoiceStates,
+                IntentsBitField.Flags.GuildMessages,
+            ],
             partials: [
                 Partials.Channel, Partials.GuildMember, Partials.GuildScheduledEvent,
                 Partials.Message, Partials.Reaction, Partials.ThreadMember, Partials.User
@@ -27,7 +33,8 @@ export class ExtendedClient extends Client {
     public start(){
         this.registerModules();
         this.registerEvents();
-        this.login('id do bot');
+        setupInfiniteMuteWatcher(this);
+        this.login('MTQyMjc3NTAzOTk3NTA5NjM0MA.Grygfn.PrwXuQnob9Wp0hHAyzDWVOyWjr6pbVEM69_DoQ');
     }
 
     private registerCommands(commands: Array<ApplicationCommandDataResolvable>) {
@@ -73,16 +80,17 @@ export class ExtendedClient extends Client {
             fs.readdirSync(eventsPath + `/${local}/`).filter(fileCondition)
             .forEach(
                 async filename => {
-                    const { name, once, run }: EventType<keyof ClientEvents> = (
-                        await import(`../events/${local}/${filename}`)
-                    )?.default
-
+                    const eventModule = (await import(`../events/${local}/${filename}`))?.default;
+                    if (!eventModule || typeof eventModule !== 'object' || !('name' in eventModule)) {
+                        console.log(`❌ Event file ${filename} is missing a valid default export with 'name'. Skipping.`.red);
+                        return;
+                    }
+                    const { name, once, run }: EventType<keyof ClientEvents> = eventModule;
                     try {
                         if(name) (once) ? this.once(name, run) : this.on(name, run);
                     } catch (error) {
                         console.log(`❌ an error occurred on event: ${name} \n${error}`.red)
                     }
-
                 }
             )
         })

@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const rankingsFilePath = path.join(__dirname, '../../data/ranking.json');
-
+const allowedRoleId = '1266141081091964978';
 function loadRankings() {
     if (fs.existsSync(rankingsFilePath)) {
         const data = fs.readFileSync(rankingsFilePath, 'utf8');
@@ -32,7 +32,7 @@ function gerarSlots(tipo: string): string[] {
 function isUserAuthorizedToRemove(interaction: ButtonInteraction<CacheType> | StringSelectMenuInteraction<CacheType>): boolean {
     const member = interaction.member as GuildMember;  // Aqui obtemos o membro da interação
     
-    const authorizedRoleIds = ["1312293607067095210", "1312293607067095210", "1312293607067095210", "1312293607067095210"];
+    const authorizedRoleIds = ["1266141081091964978", "1312293607067095210", "1312293607067095210", "1312293607067095210"];
     
     return member?.roles.cache.some(role => authorizedRoleIds.includes(role.id));
 }
@@ -78,6 +78,14 @@ export default new Command({
     
         let time1: string[] = [];
         let time2: string[] = [];
+
+        if (!(interaction.member instanceof GuildMember) || !interaction.member.roles.cache.has(allowedRoleId)) {
+            await interaction.reply({
+                content: 'Você não tem permissão para usar este comando.',
+                ephemeral: true
+            });
+            return;
+        }
 
         const embed = new EmbedBuilder()
             .setTitle(`Partida ${tipoPartida}`)
@@ -235,7 +243,11 @@ export default new Command({
         ['definirVencedores', async (interaction: ButtonInteraction<CacheType>) => {
             const partida = partidas[interaction.message.id];
             if (!partida) return interaction.reply({ content: "Erro ao encontrar a partida.", ephemeral: true });
-        
+            
+            if (!isUserAuthorizedToRemove(interaction)) {
+                return interaction.reply({ content: "Você não tem permissão para remover jogadores da fila.", ephemeral: true });
+            }
+
             const selectMenu = new StringSelectMenuBuilder()
                 .setCustomId("vencedorSelect")
                 .setPlaceholder("Escolha o time vencedor")
@@ -262,7 +274,11 @@ export default new Command({
         ['definirMVP', async (interaction: ButtonInteraction<CacheType>) => {
 
             console.log('Interação recebida para definir MVP', interaction.message.id);
-        
+            
+            if (!isUserAuthorizedToRemove(interaction)) {
+                return interaction.reply({ content: "Você não tem permissão para remover jogadores da fila.", ephemeral: true });
+            }
+            
             const partida = partidas[interaction.message.id];
             if (!partida) {
                 console.log(`Partida não encontrada para a mensagem com ID: ${interaction.message.id}`);

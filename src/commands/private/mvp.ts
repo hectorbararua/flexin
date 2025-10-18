@@ -1,7 +1,8 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Collection, ApplicationCommandType, GuildMember } from "discord.js";
 import { Command } from "../../structs/types/command";
 
-const allowedRoleId = '1312293607067095210';
+const allowedRoleId = '1266141081091964978';
+const mvpCargo = '1311446814498750524';
 
 let mvpList: string[] = [];
 
@@ -61,10 +62,13 @@ export default new Command({
             const members = await interaction.guild!.members.fetch();
 
             const memberOptions = Array.from(members.values())
-                .filter(member => !mvpList.includes(`<@${member.id}>`)) 
+                .filter(member => 
+                    member.roles.cache.has(mvpCargo) && 
+                    !mvpList.includes(`<@${member.id}>`) 
+                ) 
                 .map(member => {
-                    const memberNickname = member.displayName ?? member.user.username; 
-
+                    const memberNickname = member.displayName ?? member.user.username;
+            
                     return new StringSelectMenuOptionBuilder()
                         .setLabel(memberNickname)
                         .setValue(member.id);  
@@ -73,12 +77,12 @@ export default new Command({
                     index === self.findIndex((t) => (
                         t.data.value === value.data.value 
                     ))
-                );  
-
+                );
+        
             const selectMenu = new StringSelectMenuBuilder()
                 .setCustomId('selectAddMvp')
                 .setPlaceholder('Escolha um membro para adicionar como MVP')
-                .addOptions(memberOptions);
+                .addOptions(memberOptions.slice(0, 25));
 
             const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
