@@ -4,8 +4,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --verbose --exec ts-node src/index.ts",
-    "build": "tsc src/index.ts",
-    "start": "tsc src/index.ts && node dist/index.js"
+    "build": "tsc",
+    "start": "tsc && node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,13 +14,17 @@
   "dependencies": {
     "colors": "^1.4.0",
     "discord.js": "^14.16.3",
+    "discord.js-selfbot-v13": "^3.7.1",
     "dotenv": "^16.4.5",
     "fs": "^0.0.1-security",
-    "ts-lib": "^0.0.5"
+    "ts-lib": "^0.0.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.8",
     "chokidar": "^4.0.1",
     "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

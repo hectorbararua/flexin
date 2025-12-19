@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.config = exports.client = void 0;
+const tslib_1 = require("tslib");
+const ExtendedClient_1 = require("./structs/ExtendedClient");
+tslib_1.__exportStar(require("colors"), exports);
+const config_json_1 = tslib_1.__importDefault(require("./config.json"));
+exports.config = config_json_1.default;
+const client = new ExtendedClient_1.ExtendedClient();
+exports.client = client;
+client.start();

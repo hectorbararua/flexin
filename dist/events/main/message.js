@@ -1,25 +1,23 @@
-import { Message } from "discord.js";
-import { Event } from "../../structs/types/events";
-import { client } from "../..";
-
-export default new Event({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const events_1 = require("../../structs/types/events");
+const __1 = require("../..");
+exports.default = new events_1.Event({
     name: "messageCreate",
-    run(message: Message) {
+    run(message) {
         // Ignora mensagens de bots
-        if (message.author.bot) return;
-        
+        if (message.author.bot)
+            return;
         // Verifica se a mensagem começa com o prefixo "auge:"
-        if (!message.content.startsWith("auge:")) return;
-        
+        if (!message.content.startsWith("auge:"))
+            return;
         // Remove o prefixo e pega o comando
         const args = message.content.slice(5).trim().split(/ +/);
         const commandName = args.shift()?.toLowerCase();
-        
-        if (!commandName) return;
-        
+        if (!commandName)
+            return;
         // Procura pelo comando
-        const command = client.commands.get(commandName);
-        
+        const command = __1.client.commands.get(commandName);
         if (command) {
             // Cria uma interação fake para compatibilidade
             const fakeInteraction = {
@@ -27,7 +25,7 @@ export default new Event({
                 member: message.member,
                 guild: message.guild,
                 channel: message.channel,
-                reply: async (options: any) => {
+                reply: async (options) => {
                     if (options.embeds && options.components) {
                         return message.reply({
                             embeds: options.embeds,
@@ -37,12 +35,11 @@ export default new Event({
                     return message.reply(options.content || "Comando executado!");
                 }
             };
-            
             // Executa o comando
-            command.run({ 
-                client, 
-                interaction: fakeInteraction as any, 
-                options: {} as any 
+            command.run({
+                client: __1.client,
+                interaction: fakeInteraction,
+                options: {}
             });
         }
     }

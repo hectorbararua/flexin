@@ -1,5 +1,5 @@
 import { ApplicationCommandDataResolvable, BitFieldResolvable, Client, ClientEvents, Collection, GatewayIntentsString, IntentsBitField, Partials } from "discord.js";
-import 'dotenv'
+import 'dotenv/config'
 import { CommandType, ComponentsButton, ComponentsModal, ComponentsSelect } from "./types/command";
 import fs from 'fs';
 import path from 'path';
@@ -30,11 +30,11 @@ export class ExtendedClient extends Client {
         });
     }
 
-    public start(){
-        this.registerModules();
+    public async start(){
+        await this.registerModules();
         this.registerEvents();
         setupInfiniteMuteWatcher(this);
-        this.login('');
+        this.login(process.env.BOT_TOKEN);
     }
 
     private registerCommands(commands: Array<ApplicationCommandDataResolvable>) {
@@ -47,27 +47,30 @@ export class ExtendedClient extends Client {
         })
     }
 
-    private registerModules() {
+    private async registerModules() {
         const slashCommands: Array<ApplicationCommandDataResolvable> = new Array()
         const commandsPath = path.join(__dirname, '..', 'commands')
 
-        fs.readdirSync(commandsPath).forEach(local => {
-
-            fs.readdirSync(commandsPath + `/${local}/`).filter(fileCondition).forEach(async filename => {
+        const folders = fs.readdirSync(commandsPath);
+        
+        for (const local of folders) {
+            const files = fs.readdirSync(commandsPath + `/${local}/`).filter(fileCondition);
+            
+            for (const filename of files) {
                 const command: CommandType = (await import(`../commands/${local}/${filename}`))?.default;
                 const { name, buttons, selects, modals } = command;
 
                 if(name) {
                     this.commands.set(name, command)
                     slashCommands.push(command)
+                    console.log(`✅ Comando carregado: ${name}`.green);
 
                     if(buttons) buttons.forEach((run, key) => this.buttons.set(key, run))
                     if(selects) selects.forEach((run, key) => this.selects.set(key, run))
                     if(modals) modals.forEach((run, key) => this.modals.set(key, run))
                 }
-            })
-
-        })
+            }
+        }
 
         this.on('ready', () => this.registerCommands(slashCommands))
     }
