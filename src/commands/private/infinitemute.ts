@@ -3,7 +3,9 @@ import { CommandInteraction, GuildMember, ApplicationCommandType, PermissionsBit
 import fs from "fs";
 import path from "path";
 
-const infiniteMuteFilePath = path.join(__dirname, "../../data/infiniteMute.json");
+const dataDir = path.join(process.cwd(), "src/data");
+const infiniteMuteFilePath = path.join(dataDir, "infiniteMute.json");
+
 function loadInfiniteMuteList(): string[] {
     if (fs.existsSync(infiniteMuteFilePath)) {
         const data = fs.readFileSync(infiniteMuteFilePath, "utf8");
@@ -11,7 +13,11 @@ function loadInfiniteMuteList(): string[] {
     }
     return [];
 }
+
 function saveInfiniteMuteList(list: string[]) {
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
     fs.writeFileSync(infiniteMuteFilePath, JSON.stringify(list, null, 2));
 }
 let infiniteMuteList = loadInfiniteMuteList();
@@ -30,16 +36,18 @@ export default new Command({
         },
     ],
     async run({ interaction, options }) {
+        await interaction.deferReply({ flags: 64 });
+        
         if (!allowedUserIds.includes(interaction.user.id)) {
-            return interaction.reply({ content: "Você não tem permissão para usar este comando.", ephemeral: true });
+            return interaction.editReply({ content: "Você não tem permissão para usar este comando." });
         }
         const userOption = options.get('usuario');
         const user = userOption?.user;
-        if (!user) return interaction.reply({ content: "Usuário não encontrado.", ephemeral: true });
+        if (!user) return interaction.editReply({ content: "Usuário não encontrado." });
         const guild = interaction.guild;
-        if (!guild) return interaction.reply({ content: "Comando só pode ser usado em servidores.", ephemeral: true });
+        if (!guild) return interaction.editReply({ content: "Comando só pode ser usado em servidores." });
         const member = guild.members.cache.get(user.id) as GuildMember;
-        if (!member) return interaction.reply({ content: "Usuário não está no servidor.", ephemeral: true });
+        if (!member) return interaction.editReply({ content: "Usuário não está no servidor." });
         if (!infiniteMuteList.includes(user.id)) {
             infiniteMuteList.push(user.id);
             saveInfiniteMuteList(infiniteMuteList);
@@ -52,6 +60,6 @@ export default new Command({
                 await channel.permissionOverwrites.edit(user.id, { SendMessages: false });
             }
         }
-        await interaction.reply({ content: `Usuário ${user} foi infinite muted.`, ephemeral: true });
+        await interaction.editReply({ content: `Usuário ${user} foi infinite muted.` });
     },
 });

@@ -5,7 +5,6 @@ import fs from 'fs';
 import path from 'path';
 import { EventType } from "./types/events";
 import { setupInfiniteMuteWatcher } from "../lib/infiniteMuteWatcher";
-import { getNotificationService } from "../lib/selfbot";
 
 const fileCondition = (fileName: string) => fileName.endsWith('.ts') || fileName.endsWith('.js')
 
@@ -75,9 +74,6 @@ export class ExtendedClient extends Client {
 
         this.on('ready', async () => {
             this.registerCommands(slashCommands);
-            const notificationService = getNotificationService();
-            notificationService.setBotClient(this);
-            await notificationService.initWhitelistPanel();
         })
     }
 

@@ -2,7 +2,7 @@ import { Client, VoiceState, TextChannel, NewsChannel } from "discord.js";
 import fs from "fs";
 import path from "path";
 
-const infiniteMuteFilePath = path.join(__dirname, "../data/infiniteMute.json");
+const infiniteMuteFilePath = path.join(process.cwd(), "src/data/infiniteMute.json");
 
 function loadInfiniteMuteList(): string[] {
     if (fs.existsSync(infiniteMuteFilePath)) {
