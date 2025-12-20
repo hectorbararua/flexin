@@ -1,7 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ButtonInteraction, CacheType, ApplicationCommandType, Collection } from "discord.js";
 import { Command } from "../../structs/types/command";
 
-// Função para construir o embed
 function buildEmbed(user: any): EmbedBuilder {
     const thumbnailUrl = process.env.THUMBNAIL_URL || "https://cdn.discordapp.com/attachments/1234567890/logo.png";
     
@@ -12,7 +11,6 @@ function buildEmbed(user: any): EmbedBuilder {
         .setThumbnail(thumbnailUrl);
 }
 
-// Função para construir os componentes (botões)
 function buildComponents(): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>({
         components: [
@@ -35,7 +33,6 @@ function buildComponents(): ActionRowBuilder<ButtonBuilder> {
     });
 }
 
-// Handler para interações dos botões
 async function handlePanelaButton(interaction: ButtonInteraction<CacheType>): Promise<void> {
     const customId = interaction.customId;
     
@@ -69,7 +66,6 @@ async function handlePanelaButton(interaction: ButtonInteraction<CacheType>): Pr
     }
 }
 
-// Exportação padrão do comando
 export default new Command({
     name: "panela",
     description: "Sistema de Panela - Gerencie suas proteções especiais",
@@ -84,7 +80,6 @@ export default new Command({
         });
     },
     
-    // Handlers para os botões
     buttons: new Collection([
         ["panela:antban", handlePanelaButton],
         ["panela:primeira_dama", handlePanelaButton],

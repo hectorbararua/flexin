@@ -13,87 +13,15 @@ import {
     ModalSubmitInteraction
 } from "discord.js";
 import { Command } from "../../structs/types/command";
-import { getSelfbotManager, SelfbotClient } from "../../lib/selfbot";
-import * as fs from "fs";
-import * as path from "path";
+import { getSelfbotManager, SelfbotClient, getTokenService, getNotificationService } from "../../lib/selfbot";
 
-interface TokenClientData {
-    odiscordId: string;
-    odiscordUsername: string;
-    token: string;
-    selfbotClientId: string | null;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface TokenClientStore {
-    [odiscordId: string]: TokenClientData;
-}
-
-const TOKEN_FILE_PATH = path.join(process.cwd(), "src/data/tokenClient.json");
-
-function loadTokenStore(): TokenClientStore {
-    try {
-        if (fs.existsSync(TOKEN_FILE_PATH)) {
-            const data = fs.readFileSync(TOKEN_FILE_PATH, "utf8");
-            return JSON.parse(data);
-        }
-    } catch (error) {
-        console.error("Erro ao carregar tokenClient.json:", error);
-    }
-    return {};
-}
-
-function saveTokenStore(store: TokenClientStore): void {
-    try {
-        fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(store, null, 2), "utf8");
-    } catch (error) {
-        console.error("Erro ao salvar tokenClient.json:", error);
-    }
-}
-
-function saveUserToken(
-    odiscordId: string, 
-    odiscordUsername: string, 
-    token: string,
-    selfbotClientId: string | null = null
-): TokenClientData {
-    const store = loadTokenStore();
-    const now = new Date().toISOString();
-    
-    const existingData = store[odiscordId];
-    
-    store[odiscordId] = {
-        odiscordId,
-        odiscordUsername,
-        token,
-        selfbotClientId,
-        createdAt: existingData?.createdAt || now,
-        updatedAt: now
-    };
-    
-    saveTokenStore(store);
-    return store[odiscordId];
-}   
-
-function getUserToken(odiscordId: string): TokenClientData | null {
-    const store = loadTokenStore();
-    return store[odiscordId] || null;
-}
-
-function updateSelfbotClientId(odiscordId: string, selfbotClientId: string): void {
-    const store = loadTokenStore();
-    if (store[odiscordId]) {
-        store[odiscordId].selfbotClientId = selfbotClientId;
-        store[odiscordId].updatedAt = new Date().toISOString();
-        saveTokenStore(store);
-    }
-}
+const tokenService = getTokenService();
+const notificationService = getNotificationService();
 
 async function ensureUserClient(userId: string, username: string): Promise<SelfbotClient | null> {
-    const userData = getUserToken(userId);
+    const userData = tokenService.getUserToken(userId);
     
-    if (!userData || !userData.token) {
+    if (!userData?.token) {
         return null;
     }
     
@@ -101,7 +29,7 @@ async function ensureUserClient(userId: string, username: string): Promise<Selfb
     
     if (userData.selfbotClientId) {
         const existingClient = manager.getClient(userData.selfbotClientId);
-        if (existingClient && existingClient.isReady()) {
+        if (existingClient?.isReady()) {
             return existingClient;
         }
         
@@ -115,7 +43,7 @@ async function ensureUserClient(userId: string, username: string): Promise<Selfb
         label: `${username}-${userId.slice(-4)}`
     });
     
-    updateSelfbotClientId(userId, clientId);
+    tokenService.updateSelfbotClientId(userId, clientId);
     
     const client = manager.getClient(clientId);
     if (!client) {
@@ -126,7 +54,7 @@ async function ensureUserClient(userId: string, username: string): Promise<Selfb
     
     if (!loginSuccess) {
         manager.removeClient(clientId);
-        updateSelfbotClientId(userId, '');
+        tokenService.updateSelfbotClientId(userId, '');
         return null;
     }
     
@@ -156,7 +84,7 @@ function buildSelectMenu(): ActionRowBuilder<StringSelectMenuBuilder> {
     return new ActionRowBuilder<StringSelectMenuBuilder>({
         components: [
             new StringSelectMenuBuilder()
-                .setCustomId("painel:select")
+                .setCustomId("painelcall:select")
                 .setPlaceholder("Selecione uma opção")
                 .addOptions(
                     new StringSelectMenuOptionBuilder()
@@ -184,58 +112,55 @@ function buildSelectMenu(): ActionRowBuilder<StringSelectMenuBuilder> {
     });
 }
 
+async function resetSelectMenu(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    try {
+        const embed = buildPainelEmbed();
+        const selectMenu = buildSelectMenu();
+        
+        await interaction.webhook.editMessage(interaction.message.id, {
+            embeds: [embed],
+            components: [selectMenu]
+        });
+    } catch (error) {
+        try {
+            await interaction.message.edit({
+                embeds: [buildPainelEmbed()],
+                components: [buildSelectMenu()]
+            });
+        } catch {
+        }
+    }
+}
+
 async function handlePainelSelect(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
     const selected = interaction.values[0];
     const userId = interaction.user.id;
     
     switch (selected) {
         case "token":
-            const tokenModal = new ModalBuilder()
-                .setCustomId("painel:modal_token")
-                .setTitle("Vincular Token")
-                .addComponents(
-                    new ActionRowBuilder<TextInputBuilder>().addComponents(
-                        new TextInputBuilder()
-                            .setCustomId("token_input")
-                            .setLabel("Insira sua Token")
-                            .setPlaceholder("Cole sua token aqui...")
-                            .setStyle(TextInputStyle.Short)
-                            .setRequired(true)
-                    )
-                );
-            await interaction.showModal(tokenModal);
+            await showTokenModal(interaction);
+            await resetSelectMenu(interaction);
             break;
             
         case "call":
         case "call_muted":
-            const userData = getUserToken(userId);
-            if (!userData || !userData.token) {
+            if (!tokenService.hasToken(userId)) {
                 await interaction.reply({
                     content: "❌ **Você precisa vincular sua token primeiro!**\nSelecione a opção `Token` no menu.",
                     ephemeral: true
                 });
+                await resetSelectMenu(interaction);
                 return;
             }
             
             const isMuted = selected === "call_muted";
-            const callModal = new ModalBuilder()
-                .setCustomId(isMuted ? "painel:modal_call_muted" : "painel:modal_call")
-                .setTitle(isMuted ? "Entrar na Call (Mutado)" : "Entrar na Call")
-                .addComponents(
-                    new ActionRowBuilder<TextInputBuilder>().addComponents(
-                        new TextInputBuilder()
-                            .setCustomId("call_id_input")
-                            .setLabel("ID da Call ou do Usuário")
-                            .setPlaceholder("Insira o ID aqui...")
-                            .setStyle(TextInputStyle.Short)
-                            .setRequired(true)
-                    )
-                );
-            await interaction.showModal(callModal);
+            await showCallModal(interaction, isMuted);
+            await resetSelectMenu(interaction);
             break;
             
         case "sair":
             await handleLeaveCall(interaction);
+            await resetSelectMenu(interaction);
             break;
             
         default:
@@ -243,20 +168,54 @@ async function handlePainelSelect(interaction: StringSelectMenuInteraction<Cache
                 content: "❌ Opção não reconhecida.",
                 ephemeral: true
             });
+            await resetSelectMenu(interaction);
     }
+}
+
+async function showTokenModal(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const modal = new ModalBuilder()
+        .setCustomId("painelcall:modal_token")
+        .setTitle("Vincular Token")
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId("token_input")
+                    .setLabel("Insira sua Token")
+                    .setPlaceholder("Cole sua token aqui...")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+            )
+        );
+    await interaction.showModal(modal);
+}
+
+async function showCallModal(interaction: StringSelectMenuInteraction<CacheType>, isMuted: boolean): Promise<void> {
+    const modal = new ModalBuilder()
+        .setCustomId(isMuted ? "painelcall:modal_call_muted" : "painelcall:modal_call")
+        .setTitle(isMuted ? "Entrar na Call (Mutado)" : "Entrar na Call")
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId("call_id_input")
+                    .setLabel("ID da Call ou do Usuário")
+                    .setPlaceholder("Insira o ID aqui...")
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+            )
+        );
+    await interaction.showModal(modal);
 }
 
 async function handleTokenModal(interaction: ModalSubmitInteraction<CacheType>): Promise<void> {
     const token = interaction.fields.getTextInputValue("token_input");
-    const userId = interaction.user.id;
-    const username = interaction.user.username;
+    const { id: userId, username } = interaction.user;
     
     await interaction.deferReply({ ephemeral: true });
     
     try {
         const manager = getSelfbotManager();
         
-        const existingData = getUserToken(userId);
+        const existingData = tokenService.getUserToken(userId);
         if (existingData?.selfbotClientId) {
             const existingClient = manager.getClient(existingData.selfbotClientId);
             if (existingClient) {
@@ -264,14 +223,14 @@ async function handleTokenModal(interaction: ModalSubmitInteraction<CacheType>):
             }
         }
         
-        saveUserToken(userId, username, token);
+        tokenService.saveUserToken(userId, username, token);
         
         const clientId = manager.addClient({
             token: token,
             label: `${username}-${userId.slice(-4)}`
         });
         
-        updateSelfbotClientId(userId, clientId);
+        tokenService.updateSelfbotClientId(userId, clientId);
         
         const client = manager.getClient(clientId);
         if (!client) {
@@ -292,7 +251,7 @@ async function handleTokenModal(interaction: ModalSubmitInteraction<CacheType>):
             });
         } else {
             manager.removeClient(clientId);
-            updateSelfbotClientId(userId, '');
+            tokenService.updateSelfbotClientId(userId, '');
             
             await interaction.editReply({
                 content: `❌ **Falha ao conectar!**\n\n` +
@@ -319,8 +278,7 @@ async function handleCallMutedModal(interaction: ModalSubmitInteraction<CacheTyp
 
 async function processCallModal(interaction: ModalSubmitInteraction<CacheType>, isMuted: boolean): Promise<void> {
     const callId = interaction.fields.getTextInputValue("call_id_input");
-    const userId = interaction.user.id;
-    const username = interaction.user.username;
+    const { id: userId, username } = interaction.user;
     
     await interaction.deferReply({ ephemeral: true });
     
@@ -342,6 +300,8 @@ async function processCallModal(interaction: ModalSubmitInteraction<CacheType>, 
         const muteStatus = isMuted ? '🔇 Mutado' : '🔊 Desmutado';
         
         if (success) {
+            await notificationService.notifyCallJoin(userId, `Canal ${callId}`, callId);
+            
             await interaction.editReply({
                 content: `✅ **Entrando na call!**\n\n` +
                     `📞 **ID:** \`${callId}\`\n` +
@@ -368,8 +328,7 @@ async function processCallModal(interaction: ModalSubmitInteraction<CacheType>, 
 }
 
 async function handleLeaveCall(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
-    const userId = interaction.user.id;
-    const username = interaction.user.username;
+    const { id: userId, username } = interaction.user;
     
     await interaction.deferReply({ ephemeral: true });
     
@@ -395,6 +354,8 @@ async function handleLeaveCall(interaction: StringSelectMenuInteraction<CacheTyp
         const success = await client.voiceService.leave(client.client, targetGuildId);
         
         if (success) {
+            await notificationService.notifyCallLeave(userId, 'Saiu voluntariamente');
+            
             await interaction.editReply({
                 content: `✅ **Você saiu da call com sucesso!**`
             });
@@ -413,7 +374,7 @@ async function handleLeaveCall(interaction: StringSelectMenuInteraction<CacheTyp
 }
 
 export default new Command({
-    name: "painel",
+    name: "painelcall",
     description: "Exibe o painel de call para fixar no canal",
     type: ApplicationCommandType.ChatInput,
     async run({ interaction }) {
@@ -422,17 +383,17 @@ export default new Command({
         
         await interaction.reply({
             embeds: [embed],
-            components: [selectMenu.toJSON()]
+            components: [selectMenu]
         });
     },
     
     selects: new Collection([
-        ["painel:select", handlePainelSelect]
+        ["painelcall:select", handlePainelSelect]
     ]),
     
     modals: new Collection([
-        ["painel:modal_token", handleTokenModal],
-        ["painel:modal_call", handleCallModal],
-        ["painel:modal_call_muted", handleCallMutedModal]
+        ["painelcall:modal_token", handleTokenModal],
+        ["painelcall:modal_call", handleCallModal],
+        ["painelcall:modal_call_muted", handleCallMutedModal]
     ])
 });

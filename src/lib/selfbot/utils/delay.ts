@@ -1,22 +1,7 @@
-/**
- * Utility functions for handling delays and timing
- * Essential for rate limit management
- */
-
-/**
- * Creates a promise that resolves after specified milliseconds
- * @param ms - Milliseconds to wait
- */
 export const delay = (ms: number): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-/**
- * Executes a function with retry logic and exponential backoff
- * @param fn - Function to execute
- * @param maxRetries - Maximum number of retries
- * @param baseDelay - Base delay between retries (doubles each retry)
- */
 export const withRetry = async <T>(
     fn: () => Promise<T>,
     maxRetries: number = 3,
@@ -40,11 +25,6 @@ export const withRetry = async <T>(
     throw lastError;
 };
 
-/**
- * Executes an array of async functions sequentially with delay between each
- * @param functions - Array of async functions to execute
- * @param delayMs - Delay between each execution
- */
 export const executeSequentially = async <T>(
     functions: (() => Promise<T>)[],
     delayMs: number = 1000
@@ -55,7 +35,6 @@ export const executeSequentially = async <T>(
         const result = await functions[i]();
         results.push(result);
         
-        // Don't delay after the last function
         if (i < functions.length - 1) {
             await delay(delayMs);
         }
@@ -64,9 +43,6 @@ export const executeSequentially = async <T>(
     return results;
 };
 
-/**
- * Creates a rate limiter that ensures minimum delay between calls
- */
 export class RateLimiter {
     private lastCallTime: number = 0;
     private readonly minDelay: number;
@@ -91,4 +67,3 @@ export class RateLimiter {
         return fn();
     }
 }
-

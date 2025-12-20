@@ -1,5 +1,4 @@
-// Event listener para garantir mute infinito
-import { Client, VoiceState, GuildMember, TextChannel, NewsChannel } from "discord.js";
+import { Client, VoiceState, TextChannel, NewsChannel } from "discord.js";
 import fs from "fs";
 import path from "path";
 
@@ -14,8 +13,7 @@ function loadInfiniteMuteList(): string[] {
 }
 
 export function setupInfiniteMuteWatcher(client: Client) {
-    // Observa mudanças de estado de voz
-    client.on("voiceStateUpdate", async (oldState: VoiceState, newState: VoiceState) => {
+    client.on("voiceStateUpdate", async (_oldState: VoiceState, newState: VoiceState) => {
         const infiniteMuteList = loadInfiniteMuteList();
         const member = newState.member;
         if (!member) return;
@@ -26,8 +24,7 @@ export function setupInfiniteMuteWatcher(client: Client) {
         }
     });
 
-    // Observa tentativas de enviar mensagens em texto
-    client.on("guildMemberUpdate", async (oldMember, newMember) => {
+    client.on("guildMemberUpdate", async (_oldMember, newMember) => {
         const infiniteMuteList = loadInfiniteMuteList();
         if (infiniteMuteList.includes(newMember.id)) {
             const guild = newMember.guild;

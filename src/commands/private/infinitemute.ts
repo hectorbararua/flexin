@@ -30,7 +30,6 @@ export default new Command({
         },
     ],
     async run({ interaction, options }) {
-        // Verifica se o usuário tem permissão
         if (!allowedUserIds.includes(interaction.user.id)) {
             return interaction.reply({ content: "Você não tem permissão para usar este comando.", ephemeral: true });
         }

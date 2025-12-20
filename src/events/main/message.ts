@@ -5,23 +5,18 @@ import { client } from "../..";
 export default new Event({
     name: "messageCreate",
     run(message: Message) {
-        // Ignora mensagens de bots
         if (message.author.bot) return;
         
-        // Verifica se a mensagem começa com o prefixo "auge:"
         if (!message.content.startsWith("auge:")) return;
         
-        // Remove o prefixo e pega o comando
         const args = message.content.slice(5).trim().split(/ +/);
         const commandName = args.shift()?.toLowerCase();
         
         if (!commandName) return;
         
-        // Procura pelo comando
         const command = client.commands.get(commandName);
         
         if (command) {
-            // Cria uma interação fake para compatibilidade
             const fakeInteraction = {
                 user: message.author,
                 member: message.member,
@@ -38,7 +33,6 @@ export default new Event({
                 }
             };
             
-            // Executa o comando
             command.run({ 
                 client, 
                 interaction: fakeInteraction as any, 

@@ -1,8 +1,3 @@
-/**
- * Logger utility for Selfbot operations
- * Provides consistent, colored console output
- */
-
 const Colors = {
     reset: '\x1b[0m',
     bright: '\x1b[1m',
@@ -36,7 +31,7 @@ class SelfbotLogger {
         return new Date().toLocaleTimeString('pt-BR');
     }
 
-    private formatMessage(level: LogLevel, message: string): string {
+    private formatMessage(_level: LogLevel, message: string): string {
         const timestamp = this.showTimestamp ? `[${this.getTimestamp()}]` : '';
         return `${timestamp} ${this.prefix} ${message}`;
     }
@@ -80,9 +75,6 @@ class SelfbotLogger {
         return this.colorize(text, 'bright');
     }
 
-    /**
-     * Creates a child logger with a custom prefix
-     */
     child(prefix: string): SelfbotLogger {
         return new SelfbotLogger({
             prefix: `${this.prefix}${prefix}`,
@@ -91,11 +83,8 @@ class SelfbotLogger {
     }
 }
 
-// Singleton instance for global use
 export const Logger = new SelfbotLogger();
 
-// Factory for creating custom loggers
 export const createLogger = (options: LogOptions): SelfbotLogger => {
     return new SelfbotLogger(options);
 };
-

@@ -1,13 +1,4 @@
-/**
- * Types and interfaces for Selfbot Manager
- * Following Interface Segregation Principle (ISP)
- */
-
 import { Client } from 'discord.js-selfbot-v13';
-
-// ============================================
-// ENUMS
-// ============================================
 
 export enum SelfbotStatus {
     OFFLINE = 'offline',
@@ -22,10 +13,6 @@ export enum OperationResult {
     SKIPPED = 'skipped',
     RATE_LIMITED = 'rate_limited'
 }
-
-// ============================================
-// CONFIGURATION INTERFACES
-// ============================================
 
 export interface SelfbotConfig {
     token: string;
@@ -46,10 +33,6 @@ export const DEFAULT_MANAGER_CONFIG: ManagerConfig = {
     reconnectDelay: 5000
 };
 
-// ============================================
-// CLIENT INTERFACES
-// ============================================
-
 export interface ISelfbotClient {
     readonly id: string;
     readonly label: string;
@@ -60,10 +43,6 @@ export interface ISelfbotClient {
     logout(): Promise<void>;
     isReady(): boolean;
 }
-
-// ============================================
-// SERVICE INTERFACES
-// ============================================
 
 export interface IVoiceService {
     join(client: Client, channelId: string): Promise<boolean>;
@@ -77,10 +56,6 @@ export interface IDMService {
     stop(): void;
     isRunning(): boolean;
 }
-
-// ============================================
-// OPERATION RESULT INTERFACES
-// ============================================
 
 export interface OperationReport {
     clientId: string;
@@ -98,10 +73,6 @@ export interface BatchOperationReport {
     reports: OperationReport[];
 }
 
-// ============================================
-// MANAGER INTERFACE
-// ============================================
-
 export interface ISelfbotManager {
     addClient(config: SelfbotConfig): string;
     removeClient(clientId: string): boolean;
@@ -118,10 +89,6 @@ export interface ISelfbotManager {
     cleanDMSequentially(userId: string): Promise<BatchOperationReport>;
 }
 
-// ============================================
-// EVENT TYPES
-// ============================================
-
 export type SelfbotEventType = 
     | 'clientReady'
     | 'clientDisconnected'
@@ -136,4 +103,3 @@ export interface SelfbotEvent {
     timestamp: Date;
     data?: unknown;
 }
-

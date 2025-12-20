@@ -1,9 +1,3 @@
-/**
- * SelfbotManager - Orchestrates multiple selfbot client instances
- * Follows Open/Closed Principle - easily extendable for new operations
- * Follows Dependency Inversion - depends on abstractions (interfaces)
- */
-
 import { 
     ISelfbotManager,
     SelfbotConfig,
@@ -16,7 +10,7 @@ import {
 } from './types';
 import { SelfbotClient, createSelfbotClient } from './SelfbotClient';
 import { Logger } from './utils/Logger';
-import { delay, executeSequentially } from './utils/delay';
+import { delay } from './utils/delay';
 
 export class SelfbotManager implements ISelfbotManager {
     private clients: Map<string, SelfbotClient> = new Map();
@@ -27,15 +21,6 @@ export class SelfbotManager implements ISelfbotManager {
         this.config = { ...DEFAULT_MANAGER_CONFIG, ...config };
     }
 
-    // ============================================
-    // CLIENT MANAGEMENT
-    // ============================================
-
-    /**
-     * Adds a new selfbot client to the manager
-     * @param config - Configuration for the new client
-     * @returns The ID of the created client
-     */
     addClient(config: SelfbotConfig): string {
         const client = createSelfbotClient(config);
         this.clients.set(client.id, client);
@@ -43,19 +28,10 @@ export class SelfbotManager implements ISelfbotManager {
         return client.id;
     }
 
-    /**
-     * Adds multiple clients at once
-     * @param configs - Array of client configurations
-     * @returns Array of created client IDs
-     */
     addClients(configs: SelfbotConfig[]): string[] {
         return configs.map(config => this.addClient(config));
     }
 
-    /**
-     * Removes a client from the manager
-     * @param clientId - ID of the client to remove
-     */
     removeClient(clientId: string): boolean {
         const client = this.clients.get(clientId);
         
@@ -70,42 +46,23 @@ export class SelfbotManager implements ISelfbotManager {
         return true;
     }
 
-    /**
-     * Gets a specific client by ID
-     */
     getClient(clientId: string): SelfbotClient | undefined {
         return this.clients.get(clientId);
     }
 
-    /**
-     * Gets a client by index (useful for sequential operations)
-     */
     getClientByIndex(index: number): SelfbotClient | undefined {
         const clientsArray = Array.from(this.clients.values());
         return clientsArray[index];
     }
 
-    /**
-     * Gets all clients as an array
-     */
     getAllClients(): ISelfbotClient[] {
         return Array.from(this.clients.values());
     }
 
-    /**
-     * Gets the number of registered clients
-     */
     get clientCount(): number {
         return this.clients.size;
     }
 
-    // ============================================
-    // LOGIN / LOGOUT OPERATIONS
-    // ============================================
-
-    /**
-     * Logs in all registered clients sequentially
-     */
     async loginAll(): Promise<BatchOperationReport> {
         this.logger.info(`Iniciando login de ${this.clients.size} clientes...`);
         
@@ -126,7 +83,6 @@ export class SelfbotManager implements ISelfbotManager {
             reports.push(report);
             result ? successful++ : failed++;
 
-            // Delay between logins to avoid rate limiting
             await delay(this.config.delayBetweenAccounts);
         }
 
@@ -141,27 +97,17 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Logs out all clients
-     */
     async logoutAll(): Promise<void> {
         this.logger.info('Desconectando todos os clientes...');
         
         for (const client of this.clients.values()) {
             await client.logout();
-            await delay(500); // Small delay between logouts
+            await delay(500);
         }
 
         this.logger.success('Todos os clientes desconectados');
     }
 
-    // ============================================
-    // VOICE OPERATIONS
-    // ============================================
-
-    /**
-     * Joins a voice channel with a specific client
-     */
     async joinVoice(clientId: string, channelId: string): Promise<OperationReport> {
         const client = this.clients.get(clientId);
 
@@ -183,9 +129,6 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Joins a voice channel with all clients sequentially
-     */
     async joinVoiceAll(channelId: string): Promise<BatchOperationReport> {
         this.logger.info(`Todos os clientes entrando no canal: ${channelId}`);
 
@@ -222,9 +165,6 @@ export class SelfbotManager implements ISelfbotManager {
         return { totalClients: this.clients.size, successful, failed, skipped, reports };
     }
 
-    /**
-     * Leaves voice channel with a specific client
-     */
     async leaveVoice(clientId: string, guildId: string): Promise<OperationReport> {
         const client = this.clients.get(clientId);
 
@@ -242,9 +182,6 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Leaves voice channel with all clients
-     */
     async leaveVoiceAll(guildId: string): Promise<BatchOperationReport> {
         this.logger.info('Todos os clientes saindo do canal de voz');
 
@@ -269,13 +206,6 @@ export class SelfbotManager implements ISelfbotManager {
         return { totalClients: this.clients.size, successful, failed, skipped: 0, reports };
     }
 
-    // ============================================
-    // DM OPERATIONS
-    // ============================================
-
-    /**
-     * Cleans DM with a specific client
-     */
     async cleanDM(clientId: string, userId: string): Promise<OperationReport> {
         const client = this.clients.get(clientId);
 
@@ -302,10 +232,6 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Cleans DM with all clients sequentially (RECOMMENDED approach)
-     * This method respects rate limits and processes one account at a time
-     */
     async cleanDMSequentially(userId: string): Promise<BatchOperationReport> {
         this.logger.info(`Limpando DMs de todas as contas para usuário: ${userId}`);
 
@@ -347,7 +273,6 @@ export class SelfbotManager implements ISelfbotManager {
 
             deletedCount > 0 ? successful++ : failed++;
 
-            // Important: delay between accounts to avoid rate limits
             await delay(this.config.delayBetweenAccounts);
         }
 
@@ -362,17 +287,11 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Stops DM cleaning for a specific client
-     */
     stopDMClean(clientId: string): void {
         const client = this.clients.get(clientId);
         client?.dmService.stop();
     }
 
-    /**
-     * Stops DM cleaning for all clients
-     */
     stopAllDMClean(): void {
         for (const client of this.clients.values()) {
             client.dmService.stop();
@@ -380,18 +299,7 @@ export class SelfbotManager implements ISelfbotManager {
         this.logger.warning('Todas as limpezas de DM foram paradas');
     }
 
-    // ============================================
-    // UTILITY METHODS
-    // ============================================
-
-    /**
-     * Creates an error report for failed operations
-     */
-    private createErrorReport(
-        clientId: string, 
-        message: string, 
-        label?: string
-    ): OperationReport {
+    private createErrorReport(clientId: string, message: string, label?: string): OperationReport {
         return {
             clientId,
             clientLabel: label || 'Unknown',
@@ -400,9 +308,6 @@ export class SelfbotManager implements ISelfbotManager {
         };
     }
 
-    /**
-     * Gets status of all clients
-     */
     getStatus(): { id: string; label: string; status: string; username: string | null }[] {
         return Array.from(this.clients.values()).map(client => ({
             id: client.id,
@@ -412,9 +317,6 @@ export class SelfbotManager implements ISelfbotManager {
         }));
     }
 
-    /**
-     * Destroys the manager and all clients
-     */
     async destroy(): Promise<void> {
         await this.logoutAll();
         this.clients.clear();
@@ -422,12 +324,8 @@ export class SelfbotManager implements ISelfbotManager {
     }
 }
 
-// Singleton instance for global use
 let managerInstance: SelfbotManager | null = null;
 
-/**
- * Gets or creates the global SelfbotManager instance
- */
 export const getSelfbotManager = (config?: Partial<ManagerConfig>): SelfbotManager => {
     if (!managerInstance) {
         managerInstance = new SelfbotManager(config);
@@ -435,10 +333,6 @@ export const getSelfbotManager = (config?: Partial<ManagerConfig>): SelfbotManag
     return managerInstance;
 };
 
-/**
- * Creates a new SelfbotManager instance (non-singleton)
- */
 export const createSelfbotManager = (config?: Partial<ManagerConfig>): SelfbotManager => {
     return new SelfbotManager(config);
 };
-
