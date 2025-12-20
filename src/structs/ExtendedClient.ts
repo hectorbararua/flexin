@@ -29,8 +29,8 @@ export class ExtendedClient extends Client {
         });
     }
 
-    public async start(){
-        await this.registerModules();
+    public start(){
+        this.registerModules();
         this.registerEvents();
         this.login(process.env.BOT_TOKEN);
     }
@@ -45,34 +45,29 @@ export class ExtendedClient extends Client {
         })
     }
 
-    private async registerModules() {
+    private registerModules() {
         const slashCommands: Array<ApplicationCommandDataResolvable> = new Array()
         const commandsPath = path.join(__dirname, '..', 'commands')
 
-        const folders = fs.readdirSync(commandsPath);
-        
-        for (const local of folders) {
-            const files = fs.readdirSync(commandsPath + `/${local}/`).filter(fileCondition);
-            
-            for (const filename of files) {
+        fs.readdirSync(commandsPath).forEach(local => {
+
+            fs.readdirSync(commandsPath + `/${local}/`).filter(fileCondition).forEach(async filename => {
                 const command: CommandType = (await import(`../commands/${local}/${filename}`))?.default;
                 const { name, buttons, selects, modals } = command;
 
                 if(name) {
                     this.commands.set(name, command)
                     slashCommands.push(command)
-                    console.log(`✅ Comando carregado: ${name}`.green);
 
                     if(buttons) buttons.forEach((run, key) => this.buttons.set(key, run))
                     if(selects) selects.forEach((run, key) => this.selects.set(key, run))
                     if(modals) modals.forEach((run, key) => this.modals.set(key, run))
                 }
-            }
-        }
+            })
 
-        this.on('ready', async () => {
-            this.registerCommands(slashCommands);
         })
+
+        this.on('ready', () => this.registerCommands(slashCommands))
     }
 
     private registerEvents() {
