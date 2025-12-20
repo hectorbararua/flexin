@@ -4,7 +4,6 @@ import { CommandType, ComponentsButton, ComponentsModal, ComponentsSelect } from
 import fs from 'fs';
 import path from 'path';
 import { EventType } from "./types/events";
-import { setupInfiniteMuteWatcher } from "../lib/infiniteMuteWatcher";
 import { getNotificationService } from "../lib/selfbot";
 
 const fileCondition = (fileName: string) => fileName.endsWith('.ts') || fileName.endsWith('.js')
@@ -34,7 +33,6 @@ export class ExtendedClient extends Client {
     public async start(){
         await this.registerModules();
         this.registerEvents();
-        setupInfiniteMuteWatcher(this);
         this.login(process.env.BOT_TOKEN);
     }
 
