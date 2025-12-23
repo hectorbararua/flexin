@@ -102,6 +102,10 @@ export class TokenService {
         const data = this.getUserToken(userId);
         return data !== null && data.token !== null && data.token !== '';
     }
+
+    getAllTokens(): TokenClientStore {
+        return this.loadStore();
+    }
 }
 
 let tokenServiceInstance: TokenService | null = null;

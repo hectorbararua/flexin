@@ -1,0 +1,23 @@
+import { RankingConfig } from './types';
+
+export const RANKING_CONFIG: RankingConfig = {
+    channelId: '1453029328450359407',
+    guildId: '1453013291734401249',
+    top10RoleId: '1453031515494551827',
+    top3RoleId: '1453032038948012112',
+    updateIntervalMs: 1 * 60 * 1000,
+    updateHour: 18,
+    updateMinute: 0
+} as const;
+
+export const MEDALS = ['🥇', '🥈', '🥉'] as const;
+
+export const RANKING_MESSAGES = {
+    TITLE: '🏆 Ranking de Tempo em Call',
+    EMPTY: '*Nenhum usuário registrado ainda.*\n\nUse o painel de call para começar a acumular tempo!',
+    FOOTER: 'Atualizado diariamente às 18:00'
+} as const;
+
+export const RANKING_COLORS = {
+    GOLD: '#FFD700'
+} as const;

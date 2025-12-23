@@ -4,7 +4,7 @@ import { CommandType, ComponentsButton, ComponentsModal, ComponentsSelect } from
 import fs from 'fs';
 import path from 'path';
 import { EventType } from "./types/events";
-import { getNotificationService } from "../lib/selfbot";
+import { getNotificationService, getRankingService, getCallTimeService, getTokenVerificationService, getCallRoleService } from "../lib/selfbot";
 
 const fileCondition = (fileName: string) => fileName.endsWith('.ts') || fileName.endsWith('.js')
 
@@ -73,9 +73,22 @@ export class ExtendedClient extends Client {
 
         this.on('ready', async () => {
             this.registerCommands(slashCommands);
+            
+            const callTimeService = getCallTimeService();
+            callTimeService.cleanAllSessions();
+            
             const notificationService = getNotificationService();
             notificationService.setBotClient(this);
             await notificationService.initWhitelistPanel();
+            
+            const rankingService = getRankingService();
+            rankingService.setBotClient(this);
+            
+            const tokenVerificationService = getTokenVerificationService();
+            tokenVerificationService.setBotClient(this);
+            
+            const callRoleService = getCallRoleService();
+            callRoleService.setBotClient(this);
         })
     }
 

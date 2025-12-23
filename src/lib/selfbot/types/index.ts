@@ -1,5 +1,7 @@
 import { Client } from 'discord.js-selfbot-v13';
 
+export { CallRoleConfig } from './CallRoleConfig';
+
 export enum SelfbotStatus {
     OFFLINE = 'offline',
     ONLINE = 'online',
@@ -49,6 +51,7 @@ export interface IVoiceService {
     leave(client: Client, guildId: string): Promise<boolean>;
     reconnect(client: Client): Promise<boolean>;
     shouldReconnect(): boolean;
+    isConnecting(): boolean;
 }
 
 export interface IDMService {

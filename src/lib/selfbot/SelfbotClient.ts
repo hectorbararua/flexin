@@ -1,10 +1,18 @@
 import { Client } from 'discord.js-selfbot-v13';
 import { v4 as uuidv4 } from 'uuid';
-import { ISelfbotClient, SelfbotConfig, SelfbotStatus } from './types';
+import { ISelfbotClient, SelfbotConfig, SelfbotStatus, CallRoleConfig } from './types';
 import { createLogger } from './utils/Logger';
 import { VoiceService, createVoiceService } from './services/VoiceService';
 import { DMService, createDMService } from './services/DMService';
 import { ActivityService, createActivityService } from './services/ActivityService';
+import { FriendService, createFriendService } from './services/FriendService';
+import { getCallRoleService } from './services/CallRoleService';
+import { getCallTimeService } from './modules/callTime';
+
+interface UserInfo {
+    userId: string;
+    username: string;
+}
 
 export class SelfbotClient implements ISelfbotClient {
     public readonly id: string;
@@ -15,10 +23,13 @@ export class SelfbotClient implements ISelfbotClient {
     private readonly token: string;
     private readonly logger;
     private reconnectTimeout: NodeJS.Timeout | null = null;
+    private callRoleConfig: CallRoleConfig | null = null;
+    private userInfo: UserInfo | null = null;
 
     public readonly voiceService: VoiceService;
     public readonly dmService: DMService;
     public readonly activityService: ActivityService;
+    public readonly friendService: FriendService;
 
     constructor(config: SelfbotConfig) {
         this.id = uuidv4();
@@ -29,10 +40,55 @@ export class SelfbotClient implements ISelfbotClient {
         this.voiceService = createVoiceService();
         this.dmService = createDMService();
         this.activityService = createActivityService();
+        this.friendService = createFriendService();
 
         this.logger = createLogger({ prefix: `[${this.label}]` });
 
         this.setupEventListeners();
+        this.setupVoiceCallback();
+    }
+
+    setCallRoleConfig(config: CallRoleConfig): void {
+        this.callRoleConfig = config;
+    }
+
+    setUserInfo(userId: string, username: string): void {
+        this.userInfo = { userId, username };
+    }
+
+    private setupVoiceCallback(): void {
+        this.voiceService.onConnectionChange(async (userId, connected) => {
+            this.handleConnectionChange(userId, connected);
+        });
+    }
+
+    private async handleConnectionChange(userId: string, connected: boolean): Promise<void> {
+        if (connected) {
+            await this.onVoiceConnected(userId);
+        } else {
+            await this.onVoiceDisconnected(userId);
+        }
+    }
+
+    private async onVoiceConnected(userId: string): Promise<void> {
+        const callTimeService = getCallTimeService();
+        const username = this.userInfo?.username || 'Desconhecido';
+        callTimeService.startSession(userId, username);
+
+        if (this.callRoleConfig?.roleId) {
+            const callRoleService = getCallRoleService();
+            await callRoleService.addRole(userId, this.callRoleConfig);
+        }
+    }
+
+    private async onVoiceDisconnected(userId: string): Promise<void> {
+        const callTimeService = getCallTimeService();
+        callTimeService.endSession(userId);
+
+        if (this.callRoleConfig?.roleId) {
+            const callRoleService = getCallRoleService();
+            await callRoleService.removeRole(userId, this.callRoleConfig);
+        }
     }
 
     get status(): SelfbotStatus {

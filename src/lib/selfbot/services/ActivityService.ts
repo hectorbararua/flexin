@@ -12,6 +12,11 @@ export enum ActivityType {
 
 export type StatusType = 'online' | 'idle' | 'dnd' | 'invisible';
 
+export interface ActivityButton {
+    readonly label: string;
+    readonly url: string;
+}
+
 export interface ActivityOptions {
     readonly name: string;
     readonly type?: ActivityType;
@@ -20,15 +25,17 @@ export interface ActivityOptions {
     readonly startTimestamp?: boolean;
     readonly imageUrl?: string;
     readonly imageText?: string;
+    readonly buttons?: ActivityButton[];
+    readonly applicationId?: string;
 }
 
 export interface IActivityService {
-    setActivity(client: Client, options: ActivityOptions): boolean;
+    setActivity(client: Client, options: ActivityOptions): Promise<boolean>;
     clearActivity(client: Client): boolean;
     setStatus(client: Client, status: StatusType): boolean;
 }
 
-export interface ILogger {
+interface ILogger {
     info(message: string): void;
     success(message: string): void;
     error(message: string): void;
@@ -43,11 +50,21 @@ const ACTIVITY_TYPE_MAP: Readonly<Record<ActivityType, string>> = {
     [ActivityType.COMPETING]: 'COMPETING'
 } as const;
 
+const WS_READY_STATUS = 0;
+const CONNECTION_STABILIZE_DELAY = 3000;
+
 class RichPresenceBuilder {
     private readonly presence: RichPresence;
 
     constructor(client: Client) {
         this.presence = new RichPresence(client);
+    }
+
+    withApplicationId(applicationId?: string): this {
+        if (applicationId) {
+            this.presence.setApplicationId(applicationId);
+        }
+        return this;
     }
 
     withName(name: string): this {
@@ -62,16 +79,12 @@ class RichPresenceBuilder {
     }
 
     withState(state?: string): this {
-        if (state) {
-            this.presence.setState(state);
-        }
+        if (state) this.presence.setState(state);
         return this;
     }
 
     withDetails(details?: string): this {
-        if (details) {
-            this.presence.setDetails(details);
-        }
+        if (details) this.presence.setDetails(details);
         return this;
     }
 
@@ -84,8 +97,15 @@ class RichPresenceBuilder {
     }
 
     withTimestamp(enabled: boolean): this {
-        if (enabled) {
-            this.presence.setStartTimestamp(Date.now());
+        if (enabled) this.presence.setStartTimestamp(Date.now());
+        return this;
+    }
+
+    withButtons(buttons?: ActivityButton[]): this {
+        if (buttons && buttons.length > 0) {
+            buttons.forEach(button => {
+                this.presence.addButton(button.label, button.url);
+            });
         }
         return this;
     }
@@ -99,6 +119,10 @@ class ClientValidator {
     static isLoggedIn(client: Client): boolean {
         return client.user !== null && client.user !== undefined;
     }
+
+    static isWebSocketReady(client: Client): boolean {
+        return client.ws.status === WS_READY_STATUS;
+    }
 }
 
 export class ActivityService implements IActivityService {
@@ -108,14 +132,15 @@ export class ActivityService implements IActivityService {
         this.logger = logger ?? Logger.child('[Activity]');
     }
 
-    setActivity(client: Client, options: ActivityOptions): boolean {
-        if (!this.validateClient(client)) {
-            return false;
-        }
+    async setActivity(client: Client, options: ActivityOptions): Promise<boolean> {
+        if (!this.validateClient(client)) return false;
 
         try {
+            await this.ensureWebSocketReady(client);
+            
             const presence = this.buildPresence(client, options);
-            client.user!.setActivity(presence);
+            this.applyActivity(client, presence);
+            
             this.logger.success(`Atividade definida: ${options.name}`);
             return true;
         } catch (error) {
@@ -125,9 +150,7 @@ export class ActivityService implements IActivityService {
     }
 
     clearActivity(client: Client): boolean {
-        if (!this.validateClient(client)) {
-            return false;
-        }
+        if (!this.validateClient(client)) return false;
 
         try {
             client.user!.setActivity(null as any);
@@ -140,9 +163,7 @@ export class ActivityService implements IActivityService {
     }
 
     setStatus(client: Client, status: StatusType): boolean {
-        if (!this.validateClient(client)) {
-            return false;
-        }
+        if (!this.validateClient(client)) return false;
 
         try {
             client.user!.setStatus(status);
@@ -162,20 +183,47 @@ export class ActivityService implements IActivityService {
         return true;
     }
 
+    private async ensureWebSocketReady(client: Client): Promise<void> {
+        if (!ClientValidator.isWebSocketReady(client)) {
+            this.logger.info('Aguardando conexão estabilizar...');
+            await this.delay(CONNECTION_STABILIZE_DELAY);
+            
+            if (!ClientValidator.isWebSocketReady(client)) {
+                throw new Error('WebSocket não está pronto');
+            }
+        }
+    }
+
+    private applyActivity(client: Client, presence: RichPresence): void {
+        try {
+            client.user!.setActivity(presence);
+        } catch {
+            client.user!.setPresence({
+                activities: [presence.toJSON() as any]
+            });
+        }
+    }
+
     private buildPresence(client: Client, options: ActivityOptions): RichPresence {
         return new RichPresenceBuilder(client)
+            .withApplicationId(options.applicationId)
             .withName(options.name)
             .withType(options.type ?? ActivityType.PLAYING)
             .withState(options.state)
             .withDetails(options.details)
             .withImage(options.imageUrl, options.imageText ?? options.name)
             .withTimestamp(options.startTimestamp ?? false)
+            .withButtons(options.buttons)
             .build();
     }
 
     private logError(action: string, error: unknown): void {
         const message = error instanceof Error ? error.message : 'Erro desconhecido';
         this.logger.error(`Erro ao ${action}: ${message}`);
+    }
+
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 

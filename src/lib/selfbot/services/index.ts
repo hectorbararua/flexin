@@ -6,3 +6,5 @@ export { TokenService, createTokenService, getTokenService } from './TokenServic
 export type { TokenClientData, TokenClientStore } from './TokenService';
 export { WhitelistService, createWhitelistService, getWhitelistService } from './WhitelistService';
 export { NotificationService, createNotificationService, getNotificationService } from './NotificationService';
+export { FriendService, createFriendService } from './FriendService';
+export { ServerCleanService, createServerCleanService } from './ServerCleanService';
