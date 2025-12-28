@@ -28,6 +28,6 @@ export interface Training {
 
 export const POINTS = {
     WINNER: 10,
-    MVP: 7,
+    MVP: 5,
     HIGHLIGHT: 2,
 } as const;

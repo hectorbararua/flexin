@@ -1,15 +1,16 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { TRAINING_CUSTOM_IDS } from './constants';
 
 export class TrainingButtonBuilder {
     static buildInscricaoButtons(): ActionRowBuilder<ButtonBuilder>[] {
         const row1 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_participar')
+                    .setCustomId(TRAINING_CUSTOM_IDS.PARTICIPAR)
                     .setLabel('✅ Participar')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
-                    .setCustomId('treino_sair')
+                    .setCustomId(TRAINING_CUSTOM_IDS.SAIR)
                     .setLabel('❌ Sair')
                     .setStyle(ButtonStyle.Danger),
             ],
@@ -18,7 +19,7 @@ export class TrainingButtonBuilder {
         const row2 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_sortear')
+                    .setCustomId(TRAINING_CUSTOM_IDS.SORTEAR)
                     .setLabel('🎲 Sortear Times')
                     .setStyle(ButtonStyle.Primary),
             ],
@@ -75,11 +76,11 @@ export class TrainingButtonBuilder {
         const row2 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_voltar')
+                    .setCustomId(TRAINING_CUSTOM_IDS.VOLTAR)
                     .setLabel('⬅️ Voltar')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId('treino_remover_participante')
+                    .setCustomId(TRAINING_CUSTOM_IDS.REMOVER_PARTICIPANTE)
                     .setLabel('🗑️ Remover Participante')
                     .setStyle(ButtonStyle.Danger),
             ],
@@ -120,26 +121,64 @@ export class TrainingButtonBuilder {
             ],
         });
 
-        return [row1];
-    }
-
-    static buildSorteioButtons(): ActionRowBuilder<ButtonBuilder> {
-        return new ActionRowBuilder<ButtonBuilder>({
+        const row2 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_ressortear')
-                    .setLabel('🔄 Sortear Novamente')
+                    .setCustomId(TRAINING_CUSTOM_IDS.VOLTAR_TIMES)
+                    .setLabel('⬅️ Voltar')
+                    .setStyle(ButtonStyle.Secondary),
+            ],
+        });
+
+        return [row1, row2];
+    }
+
+    static buildSorteioButtons(): ActionRowBuilder<ButtonBuilder>[] {
+        const row1 = new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.RESSORTEAR)
+                    .setLabel('🔄 Ressortear')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId('treino_confirmar')
-                    .setLabel('✅ Confirmar Times')
+                    .setCustomId(TRAINING_CUSTOM_IDS.CONFIRMAR)
+                    .setLabel('✅ Confirmar')
                     .setStyle(ButtonStyle.Success),
             ],
         });
+
+        const row2 = new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.TROCAR_JOGADORES)
+                    .setLabel('🔀 Trocar')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.ADICIONAR_JOGADOR)
+                    .setLabel('➕ Adicionar')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.REMOVER_DO_TIME)
+                    .setLabel('➖ Remover')
+                    .setStyle(ButtonStyle.Danger),
+            ],
+        });
+
+        const row3 = new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.VOLTAR_CAPITAES)
+                    .setLabel('⬅️ Voltar')
+                    .setStyle(ButtonStyle.Secondary),
+            ],
+        });
+
+        return [row1, row2, row3];
     }
 
     static buildPartidaButtons(
-        brackets: { bracketIndex: number; team1Id: number; team2Id: number; team1Name: string; team2Name: string; resolved: boolean; hasRoom: boolean }[]
+        brackets: { bracketIndex: number; team1Id: number; team2Id: number; team1Name: string; team2Name: string; resolved: boolean; hasRoom: boolean }[],
+        hasResolvedBrackets: boolean = false
     ): ActionRowBuilder<ButtonBuilder>[] {
         const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 
@@ -162,12 +201,12 @@ export class TrainingButtonBuilder {
                 components: [
                     new ButtonBuilder()
                         .setCustomId(`treino_vencedor_${bracket.bracketIndex}_${bracket.team1Id}`)
-                        .setLabel(`🔵 ${bracket.team1Name}`)
-                        .setStyle(ButtonStyle.Primary),
+                        .setLabel(`⚫ ${bracket.team1Name}`)
+                        .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId(`treino_vencedor_${bracket.bracketIndex}_${bracket.team2Id}`)
-                        .setLabel(`🔴 ${bracket.team2Name}`)
-                        .setStyle(ButtonStyle.Danger),
+                        .setLabel(`⚪ ${bracket.team2Name}`)
+                        .setStyle(ButtonStyle.Primary),
                 ],
             });
             rows.push(row);
@@ -177,41 +216,78 @@ export class TrainingButtonBuilder {
             rows.push(new ActionRowBuilder<ButtonBuilder>({
                 components: [
                     new ButtonBuilder()
-                        .setCustomId('treino_proxima_fase')
+                        .setCustomId(TRAINING_CUSTOM_IDS.PROXIMA_FASE)
                         .setLabel('➡️ Próxima Fase')
                         .setStyle(ButtonStyle.Success),
                 ],
             }));
         }
 
+        if (rows.length < 5) {
+            const actionButtons: ButtonBuilder[] = [
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.MOVER_TIMES)
+                    .setLabel('📢 Mover Times')
+                    .setStyle(ButtonStyle.Secondary),
+            ];
+
+            if (hasResolvedBrackets) {
+                actionButtons.push(
+                    new ButtonBuilder()
+                        .setCustomId(TRAINING_CUSTOM_IDS.DESFAZER_VENCEDOR)
+                        .setLabel('↩️ Desfazer')
+                        .setStyle(ButtonStyle.Danger)
+                );
+            }
+
+            actionButtons.push(
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.VOLTAR_SORTEIO)
+                    .setLabel('⬅️ Voltar')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+
+            rows.push(new ActionRowBuilder<ButtonBuilder>({
+                components: actionButtons,
+            }));
+        }
+
         return rows;
     }
 
-    static buildFinalizadoButtons(mvpDefinido: boolean): ActionRowBuilder<ButtonBuilder>[] {
+    static buildFinalizadoButtons(mvpDefinido: boolean, temDestaques: boolean): ActionRowBuilder<ButtonBuilder>[] {
         const row1 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_add_destaque')
-                    .setLabel('➕ Adicionar Destaque')
+                    .setCustomId(TRAINING_CUSTOM_IDS.ADD_DESTAQUE)
+                    .setLabel('➕ Destaque')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId('treino_definir_mvp')
-                    .setLabel('🏅 Definir MVP')
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(mvpDefinido),
+                    .setCustomId(TRAINING_CUSTOM_IDS.REMOVER_DESTAQUE)
+                    .setLabel('➖ Destaque')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!temDestaques),
             ],
         });
 
         const row2 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
-                    .setCustomId('treino_finalizar')
+                    .setCustomId(mvpDefinido ? TRAINING_CUSTOM_IDS.TROCAR_MVP : TRAINING_CUSTOM_IDS.DEFINIR_MVP)
+                    .setLabel(mvpDefinido ? '🔄 Trocar MVP' : '🏅 Definir MVP')
+                    .setStyle(ButtonStyle.Primary),
+            ],
+        });
+
+        const row3 = new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
+                    .setCustomId(TRAINING_CUSTOM_IDS.FINALIZAR)
                     .setLabel('✅ Finalizar Treino')
                     .setStyle(ButtonStyle.Success),
             ],
         });
 
-        return [row1, row2];
+        return [row1, row2, row3];
     }
 }
-

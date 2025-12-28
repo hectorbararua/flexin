@@ -11,13 +11,11 @@ export class EventLoader {
 
     constructor(client: Client) {
         this.client = client;
-        this.eventsPath = path.join(__dirname, '../../events');
+        this.eventsPath = path.join(__dirname, '..', '..', 'events');
     }
 
     async load(): Promise<void> {
-        if (!fs.existsSync(this.eventsPath)) {
-            return;
-        }
+        if (!fs.existsSync(this.eventsPath)) return;
 
         const eventFiles = fs.readdirSync(this.eventsPath).filter(fileCondition);
 
@@ -27,7 +25,6 @@ export class EventLoader {
                 const eventModule = (await import(filePath))?.default;
 
                 if (!eventModule || typeof eventModule !== 'object' || !('name' in eventModule)) {
-                    console.log(`❌ Event file ${file} is missing a valid default export with 'name'. Skipping.`.red);
                     continue;
                 }
 
@@ -40,10 +37,7 @@ export class EventLoader {
                         this.client.on(name, run);
                     }
                 }
-            } catch (error) {
-                console.log(`❌ Error loading event from ${file}:`.red, error);
-            }
+            } catch {}
         }
     }
 }
-

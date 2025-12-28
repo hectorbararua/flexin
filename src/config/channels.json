@@ -1,0 +1,27 @@
+{
+    "guild": {
+        "mainGuildId": "1453013291734401249"
+    },
+    "welcome": {
+        "welcomeChannelId": "1453016615687028768",
+        "goodbyeChannelId": "1453837260373102854",
+        "logChannelId": "1453025374081650871"
+    },
+    "verification": {
+        "verificationChannelId": "1454693462833234052",
+        "approvalChannelId": "1453755652894757047",
+        "logChannelId": "1453834353724620891"
+    },
+    "ban": {
+        "logChannelId": "1453025554134601759",
+        "blacklistLogChannelId": "1453025593007411235"
+    },
+    "influencer": {
+        "tiktokChannelId": "1453021346115227819",
+        "youtubeChannelId": "1453021491867156502"
+    },
+    "ranking": {
+        "rankingMvpChannelId": "1453068453610258522",
+        "treinoResumoChannelId": "1453018593079066645"
+    }
+}

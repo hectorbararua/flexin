@@ -8,8 +8,14 @@ export const ROLE_IDS = {
 } as const;
 
 export const CHANNEL_IDS = {
-    RANKING_MVP: '1453068453610258522',
-    TREINO_RESUMO: '1453018593079066645',
+    get RANKING_MVP() {
+        const { channelConfig } = require('./ChannelConfigService');
+        return channelConfig.ranking.rankingMvpChannelId;
+    },
+    get TREINO_RESUMO() {
+        const { channelConfig } = require('./ChannelConfigService');
+        return channelConfig.ranking.treinoResumoChannelId;
+    },
 } as const;
 
 export const COLORS = {

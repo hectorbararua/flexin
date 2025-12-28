@@ -10,7 +10,8 @@ import {
     ModalBuilder,
     TextInputBuilder,
     TextInputStyle,
-    ModalSubmitInteraction
+    ModalSubmitInteraction,
+    TextChannel
 } from 'discord.js';
 import { Command } from '../../core/types';
 import { PermissionGuard } from '../../shared';
@@ -18,6 +19,7 @@ import { trainingService } from './TrainingService';
 import { TrainingEmbedBuilder } from './TrainingEmbedBuilder';
 import { TrainingButtonBuilder } from './TrainingButtonBuilder';
 import { captainsRepository } from '../captains/CaptainsRepository';
+import { TRAINING_CUSTOM_IDS } from './constants';
 
 export default new Command({
     name: 'iniciar',
@@ -49,11 +51,14 @@ export default new Command({
     },
 
     buttons: new Collection([
-        ['treino_participar', handleParticipar],
-        ['treino_sair', handleSair],
-        ['treino_sortear', handleSortear],
-        ['treino_voltar', handleVoltar],
-        ['treino_remover_participante', handleRemoverParticipante],
+        [TRAINING_CUSTOM_IDS.PARTICIPAR, handleParticipar],
+        [TRAINING_CUSTOM_IDS.SAIR, handleSair],
+        [TRAINING_CUSTOM_IDS.SORTEAR, handleSortear],
+        [TRAINING_CUSTOM_IDS.VOLTAR, handleVoltar],
+        [TRAINING_CUSTOM_IDS.VOLTAR_TIMES, handleVoltarTimes],
+        [TRAINING_CUSTOM_IDS.VOLTAR_CAPITAES, handleVoltarCapitaes],
+        [TRAINING_CUSTOM_IDS.VOLTAR_SORTEIO, handleVoltarSorteio],
+        [TRAINING_CUSTOM_IDS.REMOVER_PARTICIPANTE, handleRemoverParticipante],
         ['treino_times_2', (i) => handleTeamCount(i, 2)],
         ['treino_times_3', (i) => handleTeamCount(i, 3)],
         ['treino_times_4', (i) => handleTeamCount(i, 4)],
@@ -63,12 +68,19 @@ export default new Command({
         ['treino_captain_1', (i) => handleCaptainLimit(i, 1)],
         ['treino_captain_2', (i) => handleCaptainLimit(i, 2)],
         ['treino_captain_99', (i) => handleCaptainLimit(i, 99)],
-        ['treino_ressortear', handleRessortear],
-        ['treino_confirmar', handleConfirmar],
-        ['treino_add_destaque', handleAddDestaque],
-        ['treino_definir_mvp', handleDefinirMvp],
-        ['treino_finalizar', handleFinalizar],
-        ['treino_proxima_fase', handleProximaFase],
+        [TRAINING_CUSTOM_IDS.RESSORTEAR, handleRessortear],
+        [TRAINING_CUSTOM_IDS.CONFIRMAR, handleConfirmar],
+        [TRAINING_CUSTOM_IDS.TROCAR_JOGADORES, handleTrocarJogadores],
+        [TRAINING_CUSTOM_IDS.ADICIONAR_JOGADOR, handleAdicionarJogador],
+        [TRAINING_CUSTOM_IDS.REMOVER_DO_TIME, handleRemoverDoTime],
+        [TRAINING_CUSTOM_IDS.MOVER_TIMES, handleMoverTimes],
+        [TRAINING_CUSTOM_IDS.ADD_DESTAQUE, handleAddDestaque],
+        [TRAINING_CUSTOM_IDS.REMOVER_DESTAQUE, handleRemoverDestaque],
+        [TRAINING_CUSTOM_IDS.DEFINIR_MVP, handleDefinirMvp],
+        [TRAINING_CUSTOM_IDS.TROCAR_MVP, handleTrocarMvp],
+        [TRAINING_CUSTOM_IDS.FINALIZAR, handleFinalizar],
+        [TRAINING_CUSTOM_IDS.PROXIMA_FASE, handleProximaFase],
+        [TRAINING_CUSTOM_IDS.DESFAZER_VENCEDOR, handleDesfazerVencedor],
     ]),
 
     selects: new Collection([
@@ -76,6 +88,13 @@ export default new Command({
         ['treino_select_mvp', handleSelectMvp],
         ['treino_select_remover', handleSelectRemover],
         ['treino_select_captains', handleSelectCaptains],
+        [TRAINING_CUSTOM_IDS.SELECT_TROCAR_ORIGEM, handleSelectTrocarOrigem],
+        [TRAINING_CUSTOM_IDS.SELECT_TROCAR_DESTINO, handleSelectTrocarDestino],
+        [TRAINING_CUSTOM_IDS.SELECT_ADICIONAR_JOGADOR, handleSelectAdicionarJogador],
+        [TRAINING_CUSTOM_IDS.SELECT_ADICIONAR_TIME, handleSelectAdicionarTime],
+        [TRAINING_CUSTOM_IDS.SELECT_REMOVER_DO_TIME, handleSelectRemoverDoTime],
+        [TRAINING_CUSTOM_IDS.SELECT_REMOVER_DESTAQUE, handleSelectRemoverDestaque],
+        [TRAINING_CUSTOM_IDS.SELECT_DESFAZER_VENCEDOR, handleSelectDesfazerVencedor],
     ]),
 });
 
@@ -158,6 +177,66 @@ async function handleVoltar(interaction: ButtonInteraction<CacheType>): Promise<
 
     const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
     const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+
+    await interaction.update({
+        content: '',
+        embeds: [embed],
+        components: buttons.map(r => r.toJSON()),
+    });
+}
+
+async function handleVoltarTimes(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const rows = TrainingButtonBuilder.buildTeamCountButtons(training.participants.length);
+
+    await interaction.update({
+        content: `**Quantos times?** (${training.participants.length} participantes)`,
+        embeds: [],
+        components: rows.map(r => r.toJSON()),
+    });
+}
+
+async function handleVoltarCapitaes(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const teamCount = trainingService.getPendingTeamCount(interaction.message.id);
+    if (!teamCount) {
+        await handleVoltarTimes(interaction);
+        return;
+    }
+
+    const allCaptains = captainsRepository.getAll();
+    const captainsParticipating = training.participants.filter(p => allCaptains.includes(p)).length;
+    const rows = TrainingButtonBuilder.buildCaptainLimitButtons(teamCount, captainsParticipating);
+    const playersPerTeam = training.participants.length / teamCount;
+
+    await interaction.update({
+        content: `**${teamCount} times** (${playersPerTeam}v${playersPerTeam})\n👑 Capitães participando: **${captainsParticipating}**\n\n👑 **Modo de sorteio:**`,
+        embeds: [],
+        components: rows.map(r => r.toJSON()),
+    });
+}
+
+async function handleVoltarSorteio(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    trainingService.revertToSorteio(interaction.message.id);
+
+    const embed = TrainingEmbedBuilder.buildSorteioEmbed(training);
+    const buttons = TrainingButtonBuilder.buildSorteioButtons();
 
     await interaction.update({
         content: '',
@@ -334,7 +413,7 @@ async function handleCaptainLimit(interaction: ButtonInteraction<CacheType>, lim
     await interaction.update({
         content: '',
         embeds: [embed],
-        components: [buttons.toJSON()],
+        components: buttons.map(r => r.toJSON()),
     });
 }
 
@@ -364,7 +443,7 @@ async function handleSelectCaptains(interaction: StringSelectMenuInteraction<Cac
     await interaction.update({
         content: '',
         embeds: [embed],
-        components: [buttons.toJSON()],
+        components: buttons.map(r => r.toJSON()),
     });
 }
 
@@ -387,7 +466,7 @@ async function handleRessortear(interaction: ButtonInteraction<CacheType>): Prom
 
     await interaction.update({
         embeds: [embed],
-        components: [buttons.toJSON()],
+        components: buttons.map(r => r.toJSON()),
     });
 }
 
@@ -406,6 +485,310 @@ async function handleConfirmar(interaction: ButtonInteraction<CacheType>): Promi
     trainingService.confirmTeams(interaction.message.id);
 
     await updatePartidaDisplay(interaction);
+
+    const guild = interaction.guild;
+    if (guild) {
+        const result = await trainingService.moveTrainingTeamsToVoice(interaction.message.id, guild);
+        if (result.moved > 0 || result.failed > 0) {
+            const channel = interaction.channel as TextChannel;
+            const msg = await channel?.send({
+                content: `📢 **${result.moved}** jogadores movidos para suas calls!${result.failed > 0 ? ` (**${result.failed}** não estavam em call)` : ''}`,
+            });
+            setTimeout(() => msg?.delete().catch(() => {}), 5000);
+        }
+    }
+}
+
+async function handleTrocarJogadores(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const options: StringSelectMenuOptionBuilder[] = [];
+    for (const team of training.teams) {
+        for (const playerId of team.players) {
+            let name = 'Desconhecido';
+            try {
+                const member = await interaction.guild!.members.fetch(playerId);
+                name = member.displayName || member.user.username;
+            } catch {}
+            options.push(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(`${team.name} - ${name}`)
+                    .setValue(`${team.id}_${playerId}`)
+            );
+        }
+    }
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_TROCAR_ORIGEM)
+        .setPlaceholder('Escolha o PRIMEIRO jogador para trocar')
+        .addOptions(options.slice(0, 25));
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '🔀 **Trocar Jogadores**\nEscolha o primeiro jogador:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleSelectTrocarOrigem(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const [teamIdStr, playerId] = interaction.values[0].split('_');
+    const teamId = parseInt(teamIdStr);
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    trainingService.setPendingSwap(trainingMessage.id, playerId, teamId);
+
+    const training = trainingService.getTraining(trainingMessage.id);
+    if (!training) return;
+
+    const options: StringSelectMenuOptionBuilder[] = [];
+    for (const team of training.teams) {
+        if (team.id === teamId) continue;
+        for (const pid of team.players) {
+            let name = 'Desconhecido';
+            try {
+                const member = await interaction.guild!.members.fetch(pid);
+                name = member.displayName || member.user.username;
+            } catch {}
+            options.push(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(`${team.name} - ${name}`)
+                    .setValue(`${team.id}_${pid}`)
+            );
+        }
+    }
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_TROCAR_DESTINO)
+        .setPlaceholder('Escolha o SEGUNDO jogador para trocar')
+        .addOptions(options.slice(0, 25));
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.update({
+        content: '🔀 **Trocar Jogadores**\nAgora escolha o segundo jogador (de outro time):',
+        components: [row.toJSON()],
+    });
+}
+
+async function handleSelectTrocarDestino(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const [, player2Id] = interaction.values[0].split('_');
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const pendingSwap = trainingService.getPendingSwap(trainingMessage.id);
+    if (!pendingSwap) {
+        await interaction.update({ content: '❌ Erro: troca não encontrada.', components: [] });
+        return;
+    }
+
+    const success = trainingService.swapPlayers(trainingMessage.id, pendingSwap.playerId, player2Id);
+    trainingService.clearPendingSwap(trainingMessage.id);
+
+    if (!success) {
+        await interaction.update({ content: '❌ Erro ao trocar jogadores.', components: [] });
+        return;
+    }
+
+    const training = trainingService.getTraining(trainingMessage.id);
+    if (!training) return;
+
+    const embed = TrainingEmbedBuilder.buildSorteioEmbed(training);
+    const buttons = TrainingButtonBuilder.buildSorteioButtons();
+
+    await trainingMessage.edit({
+        embeds: [embed],
+        components: buttons.map(r => r.toJSON()),
+    });
+
+    await interaction.update({ content: '✅ Jogadores trocados!', components: [] });
+}
+
+async function handleAdicionarJogador(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const options: StringSelectMenuOptionBuilder[] = [];
+    for (const team of training.teams) {
+        options.push(
+            new StringSelectMenuOptionBuilder()
+                .setLabel(team.name)
+                .setValue(team.id.toString())
+        );
+    }
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_ADICIONAR_TIME)
+        .setPlaceholder('Em qual time adicionar?')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '➕ **Adicionar Jogador**\nEscolha o time:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleSelectAdicionarTime(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const teamId = parseInt(interaction.values[0]);
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    trainingService.setPendingSwap(trainingMessage.id, '', teamId);
+
+    const modal = new ModalBuilder()
+        .setCustomId(`treino_modal_adicionar_${trainingMessage.id}_${teamId}`)
+        .setTitle('Adicionar Jogador');
+
+    const userInput = new TextInputBuilder()
+        .setCustomId('user_id')
+        .setLabel('ID do usuário')
+        .setPlaceholder('Digite o ID do usuário (ex: 123456789)')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const row = new ActionRowBuilder<TextInputBuilder>({ components: [userInput] });
+    modal.addComponents(row);
+
+    await interaction.showModal(modal);
+}
+
+async function handleSelectAdicionarJogador(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    await interaction.update({ content: 'Processando...', components: [] });
+}
+
+async function handleRemoverDoTime(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const options: StringSelectMenuOptionBuilder[] = [];
+    for (const team of training.teams) {
+        for (const playerId of team.players) {
+            let name = 'Desconhecido';
+            try {
+                const member = await interaction.guild!.members.fetch(playerId);
+                name = member.displayName || member.user.username;
+            } catch {}
+            options.push(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(`${team.name} - ${name}`)
+                    .setValue(playerId)
+            );
+        }
+    }
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_REMOVER_DO_TIME)
+        .setPlaceholder('Escolha um jogador para remover')
+        .addOptions(options.slice(0, 25));
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '➖ **Remover Jogador**\nEscolha quem remover:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleSelectRemoverDoTime(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const playerId = interaction.values[0];
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const success = trainingService.removePlayerFromTeam(trainingMessage.id, playerId);
+
+    if (!success) {
+        await interaction.update({ content: '❌ Erro ao remover jogador.', components: [] });
+        return;
+    }
+
+    const training = trainingService.getTraining(trainingMessage.id);
+    if (!training) return;
+
+    const embed = TrainingEmbedBuilder.buildSorteioEmbed(training);
+    const buttons = TrainingButtonBuilder.buildSorteioButtons();
+
+    await trainingMessage.edit({
+        embeds: [embed],
+        components: buttons.map(r => r.toJSON()),
+    });
+
+    await interaction.update({ content: `✅ <@${playerId}> removido do treino!`, components: [] });
+}
+
+async function handleMoverTimes(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const guild = interaction.guild;
+    if (!guild) {
+        await interaction.reply({ content: 'Erro ao acessar o servidor.', ephemeral: true });
+        return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+
+    const result = await trainingService.moveTrainingTeamsToVoice(interaction.message.id, guild);
+
+    await interaction.editReply({
+        content: `📢 **Mover Times**\n✅ ${result.moved} jogadores movidos\n${result.failed > 0 ? `❌ ${result.failed} falharam (não estão em call)` : ''}`,
+    });
 }
 
 export async function handleVencedorDynamic(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -498,8 +881,9 @@ export async function handleSalaModal(interaction: ModalSubmitInteraction<CacheT
         };
     });
 
+    const hasResolvedBrackets = training.brackets.some(b => b.winner !== undefined);
     const embed = TrainingEmbedBuilder.buildPartidaEmbed(training);
-    const buttons = TrainingButtonBuilder.buildPartidaButtons(bracketData);
+    const buttons = TrainingButtonBuilder.buildPartidaButtons(bracketData, hasResolvedBrackets);
 
     await interaction.message?.edit({
         embeds: [embed],
@@ -507,6 +891,48 @@ export async function handleSalaModal(interaction: ModalSubmitInteraction<CacheT
     });
 
     await interaction.reply({ content: `✅ Código definido: \`${roomCode}\``, flags: 64 });
+}
+
+export async function handleAdicionarModal(interaction: ModalSubmitInteraction<CacheType>): Promise<void> {
+    const parts = interaction.customId.split('_');
+    const messageId = parts[3];
+    const teamId = parseInt(parts[4]);
+
+    const userId = interaction.fields.getTextInputValue('user_id');
+
+    const training = trainingService.getTraining(messageId);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    try {
+        await interaction.guild?.members.fetch(userId);
+    } catch {
+        await interaction.reply({ content: '❌ Usuário não encontrado no servidor.', ephemeral: true });
+        return;
+    }
+
+    const success = trainingService.addPlayerToTeam(messageId, userId, teamId);
+    if (!success) {
+        await interaction.reply({ content: '❌ Erro ao adicionar jogador.', ephemeral: true });
+        return;
+    }
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (trainingMessage) {
+        const embed = TrainingEmbedBuilder.buildSorteioEmbed(training);
+        const buttons = TrainingButtonBuilder.buildSorteioButtons();
+
+        await trainingMessage.edit({
+            embeds: [embed],
+            components: buttons.map(r => r.toJSON()),
+        });
+    }
+
+    await interaction.reply({ content: `✅ <@${userId}> adicionado ao Time ${teamId}!`, ephemeral: true });
 }
 
 async function handleProximaFase(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -524,7 +950,7 @@ async function updatePartidaDisplay(interaction: ButtonInteraction<CacheType>): 
 
     if (training.status === 'finalizado') {
         const embed = TrainingEmbedBuilder.buildFinalizadoEmbed(training);
-        const buttons = TrainingButtonBuilder.buildFinalizadoButtons(!!training.mvpId);
+        const buttons = TrainingButtonBuilder.buildFinalizadoButtons(!!training.mvpId, training.highlights.length > 0);
 
         await interaction.update({
             embeds: [embed],
@@ -535,7 +961,7 @@ async function updatePartidaDisplay(interaction: ButtonInteraction<CacheType>): 
 
     const pendingBrackets = trainingService.getPendingBracketsForCurrentPhase(training);
     
-    const bracketData = pendingBrackets.map((bracket, idx) => {
+    const bracketData = pendingBrackets.map((bracket) => {
         const actualIndex = training.brackets.indexOf(bracket);
         const team1 = trainingService.getTeamForBracket(training, bracket.team1);
         const team2 = trainingService.getTeamForBracket(training, bracket.team2);
@@ -551,8 +977,9 @@ async function updatePartidaDisplay(interaction: ButtonInteraction<CacheType>): 
         };
     });
 
+    const hasResolvedBrackets = training.brackets.some(b => b.winner !== undefined);
     const embed = TrainingEmbedBuilder.buildPartidaEmbed(training);
-    const buttons = TrainingButtonBuilder.buildPartidaButtons(bracketData);
+    const buttons = TrainingButtonBuilder.buildPartidaButtons(bracketData, hasResolvedBrackets);
 
     await interaction.update({
         embeds: [embed],
@@ -621,7 +1048,7 @@ async function handleSelectDestaque(interaction: StringSelectMenuInteraction<Cac
     if (!training) return;
 
     const embed = TrainingEmbedBuilder.buildFinalizadoEmbed(training);
-    const buttons = TrainingButtonBuilder.buildFinalizadoButtons(!!training.mvpId);
+    const buttons = TrainingButtonBuilder.buildFinalizadoButtons(!!training.mvpId, training.highlights.length > 0);
 
     await trainingMessage.edit({
         embeds: [embed],
@@ -685,7 +1112,7 @@ async function handleSelectMvp(interaction: StringSelectMenuInteraction<CacheTyp
     if (!training) return;
 
     const embed = TrainingEmbedBuilder.buildFinalizadoEmbed(training);
-    const buttons = TrainingButtonBuilder.buildFinalizadoButtons(true);
+    const buttons = TrainingButtonBuilder.buildFinalizadoButtons(true, training.highlights.length > 0);
 
     await trainingMessage.edit({
         embeds: [embed],
@@ -693,6 +1120,202 @@ async function handleSelectMvp(interaction: StringSelectMenuInteraction<CacheTyp
     });
 
     await interaction.update({ content: '✅ MVP definido!', components: [] });
+}
+
+async function handleRemoverDestaque(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    if (training.highlights.length === 0) {
+        await interaction.reply({ content: 'Não há destaques para remover.', ephemeral: true });
+        return;
+    }
+
+    const options = await Promise.all(
+        training.highlights.slice(0, 25).map(async (playerId) => {
+            let name = 'Desconhecido';
+            try {
+                const member = await interaction.guild!.members.fetch(playerId);
+                name = member.displayName || member.user.username;
+            } catch {}
+            return new StringSelectMenuOptionBuilder().setLabel(name).setValue(playerId);
+        })
+    );
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_REMOVER_DESTAQUE)
+        .setPlaceholder('Escolha um destaque para remover')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '➖ Escolha um destaque para remover:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleSelectRemoverDestaque(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const playerId = interaction.values[0];
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    trainingService.removeHighlight(trainingMessage.id, playerId);
+
+    const training = trainingService.getTraining(trainingMessage.id);
+    if (!training) return;
+
+    const embed = TrainingEmbedBuilder.buildFinalizadoEmbed(training);
+    const buttons = TrainingButtonBuilder.buildFinalizadoButtons(!!training.mvpId, training.highlights.length > 0);
+
+    await trainingMessage.edit({
+        embeds: [embed],
+        components: buttons.map(r => r.toJSON()),
+    });
+
+    await interaction.update({ content: '✅ Destaque removido!', components: [] });
+}
+
+async function handleTrocarMvp(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const options = await Promise.all(
+        training.participants.slice(0, 25).map(async (playerId) => {
+            let name = 'Desconhecido';
+            try {
+                const member = await interaction.guild!.members.fetch(playerId);
+                name = member.displayName || member.user.username;
+            } catch {}
+            return new StringSelectMenuOptionBuilder().setLabel(name).setValue(playerId);
+        })
+    );
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('treino_select_mvp')
+        .setPlaceholder('Escolha o novo MVP')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '🔄 Escolha o novo MVP:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleDesfazerVencedor(interaction: ButtonInteraction<CacheType>): Promise<void> {
+    if (!PermissionGuard.canRemovePlayer(interaction)) {
+        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        return;
+    }
+
+    const training = trainingService.getTraining(interaction.message.id);
+    if (!training) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const resolvedBrackets = trainingService.getResolvedBrackets(interaction.message.id);
+    
+    if (resolvedBrackets.length === 0) {
+        await interaction.reply({ content: 'Não há vencedores definidos para desfazer.', ephemeral: true });
+        return;
+    }
+
+    const options = resolvedBrackets.map(bracket => 
+        new StringSelectMenuOptionBuilder()
+            .setLabel(`${bracket.phaseName} - Vencedor: ${bracket.winnerName}`)
+            .setValue(bracket.bracketIndex.toString())
+    );
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(TRAINING_CUSTOM_IDS.SELECT_DESFAZER_VENCEDOR)
+        .setPlaceholder('Escolha qual resultado desfazer')
+        .addOptions(options);
+
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+    await interaction.reply({
+        content: '↩️ **Desfazer Vencedor**\nEscolha qual resultado você quer desfazer:',
+        components: [row.toJSON()],
+        ephemeral: true,
+    });
+}
+
+async function handleSelectDesfazerVencedor(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
+    const bracketIndex = parseInt(interaction.values[0]);
+
+    const messages = await interaction.channel?.messages.fetch({ limit: 20 });
+    const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
+
+    if (!trainingMessage) {
+        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        return;
+    }
+
+    const success = trainingService.clearWinner(trainingMessage.id, bracketIndex);
+
+    if (!success) {
+        await interaction.update({ content: '❌ Erro ao desfazer vencedor.', components: [] });
+        return;
+    }
+
+    const training = trainingService.getTraining(trainingMessage.id);
+    if (!training) return;
+
+    const pendingBrackets = trainingService.getPendingBracketsForCurrentPhase(training);
+    
+    const bracketData = pendingBrackets.map((bracket) => {
+        const actualIndex = training.brackets.indexOf(bracket);
+        const team1 = trainingService.getTeamForBracket(training, bracket.team1);
+        const team2 = trainingService.getTeamForBracket(training, bracket.team2);
+        
+        return {
+            bracketIndex: actualIndex,
+            team1Id: team1?.id || 0,
+            team2Id: team2?.id || 0,
+            team1Name: team1?.name || '?',
+            team2Name: team2?.name || '?',
+            resolved: !!bracket.winner,
+            hasRoom: !!bracket.roomCode,
+        };
+    });
+
+    const hasResolvedBrackets = training.brackets.some(b => b.winner !== undefined);
+    const embed = TrainingEmbedBuilder.buildPartidaEmbed(training);
+    const buttons = TrainingButtonBuilder.buildPartidaButtons(bracketData, hasResolvedBrackets);
+
+    await trainingMessage.edit({
+        embeds: [embed],
+        components: buttons.map(r => r.toJSON()),
+    });
+
+    await interaction.update({ content: '✅ Vencedor desfeito!', components: [] });
 }
 
 async function handleFinalizar(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -716,5 +1339,7 @@ async function handleFinalizar(interaction: ButtonInteraction<CacheType>): Promi
         components: [],
     });
 
-    await interaction.followUp({ content: '✅ Treino finalizado! Pontos distribuídos e resumo enviado.', ephemeral: true });
+    const channel = interaction.channel as TextChannel;
+    const msg = await channel?.send({ content: '✅ Treino finalizado! Pontos distribuídos e resumo enviado.' });
+    setTimeout(() => msg?.delete().catch(() => {}), 5000);
 }

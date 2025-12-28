@@ -1,6 +1,8 @@
 import { Client, EmbedBuilder, Guild, TextChannel } from 'discord.js';
 import { MvpRepository, MvpData } from './MvpRepository';
-import { COLORS, ROLE_IDS, CHANNEL_IDS, GUILD_IDS } from '../../config';
+import { channelConfig } from '../../config/ChannelConfigService';
+import { COLORS } from '../../config/emojis';
+import { SPECIAL_ROLES } from '../../config/roles';
 
 export class MvpService {
     private repository: MvpRepository;
@@ -21,11 +23,11 @@ export class MvpService {
     }
 
     async updateRoles(client: Client): Promise<void> {
-        const guild = client.guilds.cache.get(GUILD_IDS.MAIN);
+        const guild = client.guilds.cache.get(channelConfig.guild.mainGuildId);
         if (!guild) return;
 
         const top10Ids = this.repository.getTop10UserIds();
-        const mvpRoleId = ROLE_IDS.MVP;
+        const mvpRoleId = SPECIAL_ROLES.MVP;
 
         if (!mvpRoleId) return;
 
@@ -55,18 +57,18 @@ export class MvpService {
     }
 
     async sendRankingUpdate(client: Client): Promise<void> {
-        const guild = client.guilds.cache.get(GUILD_IDS.MAIN);
+        const guild = client.guilds.cache.get(channelConfig.guild.mainGuildId);
         if (!guild) return;
 
-        const channel = guild.channels.cache.get(CHANNEL_IDS.RANKING_MVP) as TextChannel;
+        const channel = guild.channels.cache.get(channelConfig.ranking.rankingMvpChannelId) as TextChannel;
         if (!channel) return;
 
         const embed = await this.buildRankingEmbed(guild);
 
         const messages = await channel.messages.fetch({ limit: 10 });
         const botMessage = messages.find(
-            msg => msg.author.id === client.user?.id && 
-                   msg.embeds[0]?.title === '🏆 Ranking de MVPs'
+            msg => msg.author.id === client.user?.id &&
+                msg.embeds[0]?.title === '🏆 Ranking de MVPs'
         );
 
         if (botMessage) {
@@ -82,7 +84,7 @@ export class MvpService {
         const rankingLines = await Promise.all(
             top10.map(async (mvp, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-                
+
                 let displayName = mvp.username;
                 try {
                     const member = await guild.members.fetch(mvp.odiscordUserId);
@@ -96,11 +98,11 @@ export class MvpService {
         return new EmbedBuilder()
             .setTitle('🏆 Ranking de MVPs')
             .setDescription(
-                rankingLines.length > 0 
-                    ? rankingLines.join('\n') 
+                rankingLines.length > 0
+                    ? rankingLines.join('\n')
                     : 'Nenhum MVP registrado ainda.'
             )
-            .setColor(COLORS.PRIMARY as `#${string}`)
+            .setColor(COLORS.INFO)
             .setFooter({ text: `Top 10 ganham o cargo de MVP` })
             .setTimestamp();
     }

@@ -78,13 +78,13 @@ export class TrainingEmbedBuilder {
             });
 
             fields.push({
-                name: `🔵 ${team1?.name || '?'}`,
+                name: `⚫ ${team1?.name || '?'}`,
                 value: team1Mentions,
                 inline: true,
             });
 
             fields.push({
-                name: `🔴 ${team2?.name || '?'}`,
+                name: `⚪ ${team2?.name || '?'}`,
                 value: team2Mentions,
                 inline: true,
             });

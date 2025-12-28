@@ -25,6 +25,7 @@ export class ExtendedClient extends Client {
                 IntentsBitField.Flags.GuildMembers,
                 IntentsBitField.Flags.GuildVoiceStates,
                 IntentsBitField.Flags.GuildMessages,
+                IntentsBitField.Flags.MessageContent,
             ],
             partials: [
                 Partials.Channel,

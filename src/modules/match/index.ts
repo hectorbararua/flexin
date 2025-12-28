@@ -3,3 +3,4 @@ export * from './TrainingService';
 export * from './TrainingEmbedBuilder';
 export * from './TrainingButtonBuilder';
 export * from './types';
+export * from './constants';

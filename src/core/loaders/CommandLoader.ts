@@ -18,7 +18,7 @@ export class CommandLoader {
     private modulesPath: string;
 
     constructor() {
-        this.modulesPath = path.join(__dirname, '../../modules');
+        this.modulesPath = path.join(__dirname, '..', '..', 'modules');
     }
 
     async load(): Promise<LoadedCommands> {
@@ -82,10 +82,7 @@ export class CommandLoader {
                         command.modals.forEach((run, key) => modals.set(key, run));
                     }
                 }
-            } catch (error) {
-                console.log(`❌ Error loading command from ${file}:`.red, error);
-            }
+            } catch {}
         }
     }
 }
-
