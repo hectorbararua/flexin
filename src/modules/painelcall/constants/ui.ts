@@ -43,7 +43,7 @@ export const RICH_PRESENCE_CONFIG = {
 
 export const CALL_ROLE_CONFIG = {
     guildId: '1453013291734401249',
-    roleId: '1453033214489661545'
+    roleId: '1452460663212609567'
 } as const;
 
 export type CustomIdType = typeof CUSTOM_IDS[keyof typeof CUSTOM_IDS];

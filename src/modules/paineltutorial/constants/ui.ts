@@ -31,7 +31,7 @@ Vincula sua conta ao bot.
 **iPhone / Android / PC**
 Tutoriais de como pegar sua token.
 
-• Todos os botões explicam como pegar a token, caso tenha duvida de como usar o painel só ler a mensagem do <#1452056047023034489>, <#1452064389866721400>, só clicar em cada botão que ele faz automaticamente.
+• Todos os botões explicam como pegar a token, caso tenha duvida de como usar o painel só ler a mensagem do <#1452064389866721400>, <#1452056047023034489>, só clicar em cada botão que ele faz automaticamente.
 `
 } as const;
 

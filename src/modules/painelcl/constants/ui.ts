@@ -45,7 +45,7 @@ export const PAINEL_CONFIG = {
     FOOTER: 'Selecione uma opção abaixo',
     DESCRIPTION: `Organize e limpe suas mensagens de forma rápida e automatizada.
 
-> ⚠️ **Conecte sua conta primeiro em** <#1453026603683549301>
+> ⚠️ **Conecte sua conta primeiro em** <#1452073178082840637>
 
 **CL**
 Limpa mensagens com uma pessoa ou grupo.

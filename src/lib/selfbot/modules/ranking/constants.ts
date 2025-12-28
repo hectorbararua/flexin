@@ -1,10 +1,10 @@
 import { RankingConfig } from './types';
 
 export const RANKING_CONFIG: RankingConfig = {
-    channelId: '1453029328450359407',
+    channelId: '1452489456555655228',
     guildId: '1453013291734401249',
-    top10RoleId: '1453031515494551827',
-    top3RoleId: '1453032038948012112',
+    top10RoleId: '1452458963927826597',
+    top3RoleId: '1452457972444692661',
     updateIntervalMs: 1 * 60 * 1000,
     updateHour: 18,
     updateMinute: 0

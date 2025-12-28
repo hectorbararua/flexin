@@ -8,10 +8,10 @@ export interface VerificationConfig {
 }
 
 export const VERIFICATION_CONFIG: VerificationConfig = {
-    logChannelId: '1453019680683065355',
+    logChannelId: '1452489456555655228',
     guildId: '1453013291734401249',
-    verifiedRoleId: '1453031454257713192',
-    unverifiedRoleId: '1453031495466876990',
+    verifiedRoleId: '1452457953276985364',
+    unverifiedRoleId: '1452458813063172301',
     verificationHour: 18,
     verificationMinute: 0
 } as const;

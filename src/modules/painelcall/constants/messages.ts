@@ -4,7 +4,7 @@ export const MESSAGES = {
         DESCRIPTION: 
             `Gerencie suas calls de forma automatizada.
 
-> ⚠️ **Conecte sua conta primeiro em** <#1453026603683549301>
+> ⚠️ **Conecte sua conta primeiro em** <#1452073178082840637>
 
 **Call**
 Entra na call desmutado.
