@@ -10,13 +10,15 @@ import { PERMISSION_GROUPS, hasAnyRole } from '../config/roles';
 export default new Event({
     name: 'guildMemberUpdate',
     async run(oldMember, newMember) {
-        if (oldMember.partial) await oldMember.fetch();
-        if (newMember.partial) await newMember.fetch();
+        try {
+            if (oldMember.partial) await oldMember.fetch();
+            if (newMember.partial) await newMember.fetch();
 
-        await protectVerificationRoles(oldMember as GuildMember, newMember as GuildMember);
-        await syncInfluencerRole(newMember as GuildMember);
-        await syncPlatformRole(newMember as GuildMember, 'tiktok');
-        await syncPlatformRole(newMember as GuildMember, 'youtube');
+            await protectVerificationRoles(oldMember as GuildMember, newMember as GuildMember);
+            await syncInfluencerRole(newMember as GuildMember);
+            await syncPlatformRole(newMember as GuildMember, 'tiktok');
+            await syncPlatformRole(newMember as GuildMember, 'youtube');
+        } catch {}
     },
 });
 

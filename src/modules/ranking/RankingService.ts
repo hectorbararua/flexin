@@ -71,7 +71,6 @@ export class RankingService {
                 if (error instanceof DiscordAPIError && error.code === 10007) {
                     continue;
                 }
-                console.error('Error fetching member:', error);
             }
         }
 

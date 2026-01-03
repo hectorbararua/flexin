@@ -63,6 +63,13 @@
       "profileUrl": "https://www.tiktok.com/@murasakielo",
       "username": "murasakielo",
       "addedAt": "2025-12-28T03:05:48.398Z"
+    },
+    {
+      "discordId": "576887771151466558",
+      "platform": "youtube",
+      "profileUrl": "https://youtube.com/@murasakielo",
+      "username": "murasakielo",
+      "addedAt": "2026-01-02T02:25:48.500Z"
     }
   ],
   "916838687663349760": [
@@ -72,6 +79,24 @@
       "profileUrl": "https://www.tiktok.com/@nevesyk0000",
       "username": "nevesyk0000",
       "addedAt": "2025-12-29T01:40:04.255Z"
+    }
+  ],
+  "645683939352248320": [
+    {
+      "discordId": "645683939352248320",
+      "platform": "tiktok",
+      "profileUrl": "https://www.tiktok.com/@iammyh",
+      "username": "iammyh",
+      "addedAt": "2025-12-31T19:08:50.713Z"
+    }
+  ],
+  "1363529846197846268": [
+    {
+      "discordId": "1363529846197846268",
+      "platform": "tiktok",
+      "profileUrl": "https://www.tiktok.com/@nyczint",
+      "username": "nyczint",
+      "addedAt": "2026-01-01T22:42:56.230Z"
     }
   ]
 }

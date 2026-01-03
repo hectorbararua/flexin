@@ -7,14 +7,15 @@ export default new Event({
     name: 'ready',
     once: true,
     async run() {
-        const { commands } = client;
-        console.log('🆗 Bot Online'.green);
-        console.log(`📚 Commands: ${commands.size}`.cyan);
+        try {
+            const { commands } = client;
+            console.log('🆗 Bot Online'.green);
+            console.log(`📚 Commands: ${commands.size}`.cyan);
 
-        channelConfig.reload();
+            channelConfig.reload();
 
-        setTimeout(async () => {
+            await new Promise(resolve => setTimeout(resolve, 2000));
             await verificationService.initVerificationEmbed(client);
-        }, 2000);
+        } catch {}
     },
 });

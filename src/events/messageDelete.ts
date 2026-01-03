@@ -5,10 +5,12 @@ import { channelConfig } from '../config/ChannelConfigService';
 export default new Event({
     name: 'messageDelete',
     async run(message) {
-        if (message.channelId !== channelConfig.verification.verificationChannelId) return;
-        if (message.author?.id !== message.client.user?.id) return;
-        if (!message.embeds || message.embeds.length === 0) return;
+        try {
+            if (message.channelId !== channelConfig.verification.verificationChannelId) return;
+            if (message.author?.id !== message.client.user?.id) return;
+            if (!message.embeds || message.embeds.length === 0) return;
 
-        await verificationService.initVerificationEmbed(message.client);
+            await verificationService.initVerificationEmbed(message.client);
+        } catch {}
     },
 });

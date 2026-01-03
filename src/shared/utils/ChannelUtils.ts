@@ -5,12 +5,10 @@ export class ChannelUtils {
         try {
             const channel = await client.channels.fetch(channelId);
             if (!channel || !channel.isTextBased()) {
-                console.error(`Channel ${channelId} not found or is not a text channel`);
                 return null;
             }
             return channel as TextChannel;
-        } catch (error) {
-            console.error(`Error fetching channel ${channelId}:`, error);
+        } catch {
             return null;
         }
     }
@@ -26,8 +24,7 @@ export class ChannelUtils {
                 message.delete().catch(() => {});
             }, deleteAfterMs);
             return message;
-        } catch (error) {
-            console.error('Error sending temporary message:', error);
+        } catch {
             return null;
         }
     }

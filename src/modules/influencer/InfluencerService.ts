@@ -30,8 +30,7 @@ export class InfluencerService {
                 message: `Influencer adicionado com sucesso!`, 
                 influencer 
             };
-        } catch (error) {
-            console.error('Error adding influencer role:', error);
+        } catch {
             this.influencerRepo.remove(discordId);
             return { success: false, message: 'Erro ao adicionar o cargo de influencer.' };
         }
@@ -82,11 +81,8 @@ export class InfluencerService {
         if (hasInfluencerRole && !isRegistered) {
             try {
                 await member.roles.remove(INFLUENCER_ROLE_IDS.INFLUENCER);
-                console.log(`Removed unauthorized influencer role from ${member.user.tag}`);
                 return true;
-            } catch (error) {
-                console.error('Error removing unauthorized role:', error);
-            }
+            } catch {}
         }
 
         return false;
@@ -148,10 +144,7 @@ export class InfluencerService {
         try {
             const member = await guild.members.fetch(discordId);
             await member.roles.add(roleId);
-            console.log(`Added ${platform} role to ${member.user.tag}`);
-        } catch (error) {
-            console.error(`Error adding ${platform} role:`, error);
-        }
+        } catch {}
     }
 
     private async removePlatformRole(discordId: string, platform: Platform, guild: Guild): Promise<void> {
@@ -161,10 +154,7 @@ export class InfluencerService {
         try {
             const member = await guild.members.fetch(discordId);
             await member.roles.remove(roleId);
-            console.log(`Removed ${platform} role from ${member.user.tag}`);
-        } catch (error) {
-            console.error(`Error removing ${platform} role:`, error);
-        }
+        } catch {}
     }
 
     async removeAllPlatformRoles(discordId: string, guild: Guild): Promise<void> {

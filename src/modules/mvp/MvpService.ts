@@ -51,9 +51,7 @@ export class MvpService {
                     }
                 } catch {}
             }
-        } catch (error) {
-            console.error('Erro ao atualizar cargos MVP:', error);
-        }
+        } catch {}
     }
 
     async sendRankingUpdate(client: Client): Promise<void> {

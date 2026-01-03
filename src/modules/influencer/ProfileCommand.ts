@@ -70,7 +70,7 @@ export default new Command({
         if (!member.roles.cache.has(INFLUENCER_ROLE_IDS.INFLUENCER)) {
             await interaction.reply({
                 content: '❌ Apenas influencers podem gerenciar perfis.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -78,7 +78,7 @@ export default new Command({
         if (!influencerService.isInfluencer(userId)) {
             await interaction.reply({
                 content: '❌ Você não está cadastrado como influencer.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -110,7 +110,7 @@ async function handleAdicionar(
     if (!guild) {
         await interaction.reply({
             content: '❌ Este comando só pode ser usado em um servidor.',
-            ephemeral: true,
+            flags: 64,
         });
         return;
     }
@@ -136,12 +136,12 @@ async function handleAdicionar(
 
         await interaction.reply({
             content: `❌ Link inválido para ${config.name}.\n\n**Formato esperado:** \`${example}\``,
-            ephemeral: true,
+            flags: 64,
         });
         return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const username = platform === 'roblox' ? 'roblox' : extractUsername(profileUrl, platform);
 
@@ -182,12 +182,12 @@ async function handleRemover(
     if (!guild) {
         await interaction.reply({
             content: '❌ Este comando só pode ser usado em um servidor.',
-            ephemeral: true,
+            flags: 64,
         });
         return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const removed = await influencerService.removeProfile(interaction.user.id, platform, guild);
 
@@ -212,7 +212,7 @@ async function handleListar(
     const profiles = influencerService.getProfiles(interaction.user.id);
     const embed = PostEmbedBuilder.buildProfileListEmbed(interaction.user, profiles);
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: 64 });
 }
 
 function extractUsername(profileUrl: string, platform: Platform): string | null {

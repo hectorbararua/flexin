@@ -30,8 +30,7 @@ export class LockService {
             });
 
             return { success: true, message: LOCK_MESSAGES.LOCK_SUCCESS(executor.id) };
-        } catch (error) {
-            console.error('Error locking channel:', error);
+        } catch {
             return { success: false, message: LOCK_MESSAGES.ERROR_LOCK_FAILED };
         }
     }
@@ -54,8 +53,7 @@ export class LockService {
             });
 
             return { success: true, message: LOCK_MESSAGES.UNLOCK_SUCCESS(executor.id) };
-        } catch (error) {
-            console.error('Error unlocking channel:', error);
+        } catch {
             return { success: false, message: LOCK_MESSAGES.ERROR_UNLOCK_FAILED };
         }
     }

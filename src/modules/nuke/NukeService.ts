@@ -68,7 +68,7 @@ export class NukeService {
         if (!pendingNuke) {
             await interaction.reply({
                 content: '❌ Esta confirmação expirou.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -76,7 +76,7 @@ export class NukeService {
         if (pendingNuke.executorId !== interaction.user.id) {
             await interaction.reply({
                 content: '❌ Apenas quem solicitou pode confirmar ou cancelar.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -114,7 +114,7 @@ export class NukeService {
         if (!guild || !oldChannel) {
             await interaction.reply({
                 content: NUKE_MESSAGES.ERROR_NUKE_FAILED,
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }

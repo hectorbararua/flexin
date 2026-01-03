@@ -31,20 +31,22 @@ const selects: ComponentsSelect = new Collection([
 
 const modals: ComponentsModal = new Collection();
 
-export function handleVerificationApproval(interaction: ButtonInteraction): void {
-    const customId = interaction.customId;
+export async function handleVerificationApproval(interaction: ButtonInteraction): Promise<void> {
+    try {
+        const customId = interaction.customId;
 
-    if (customId.startsWith(VERIFICATION_CUSTOM_IDS.APPROVE_BUTTON)) {
-        const requestId = customId.replace(`${VERIFICATION_CUSTOM_IDS.APPROVE_BUTTON}_`, '');
-        verificationService.handleApproval(interaction, requestId, true);
-        return;
-    }
+        if (customId.startsWith(VERIFICATION_CUSTOM_IDS.APPROVE_BUTTON)) {
+            const requestId = customId.replace(`${VERIFICATION_CUSTOM_IDS.APPROVE_BUTTON}_`, '');
+            await verificationService.handleApproval(interaction, requestId, true);
+            return;
+        }
 
-    if (customId.startsWith(VERIFICATION_CUSTOM_IDS.REJECT_BUTTON)) {
-        const requestId = customId.replace(`${VERIFICATION_CUSTOM_IDS.REJECT_BUTTON}_`, '');
-        verificationService.handleApproval(interaction, requestId, false);
-        return;
-    }
+        if (customId.startsWith(VERIFICATION_CUSTOM_IDS.REJECT_BUTTON)) {
+            const requestId = customId.replace(`${VERIFICATION_CUSTOM_IDS.REJECT_BUTTON}_`, '');
+            await verificationService.handleApproval(interaction, requestId, false);
+            return;
+        }
+    } catch {}
 }
 
 export default new Command({
@@ -62,7 +64,7 @@ export default new Command({
         if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
             await interaction.reply({
                 content: '❌ Você não tem permissão para usar este comando.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -72,12 +74,12 @@ export default new Command({
         if (!channel) {
             await interaction.reply({
                 content: '❌ Não foi possível encontrar o canal.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 });
 
         const success = await verificationService.sendVerificationEmbed(channel);
 

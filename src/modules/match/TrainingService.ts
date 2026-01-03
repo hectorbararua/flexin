@@ -5,6 +5,10 @@ import { captainsRepository } from '../captains/CaptainsRepository';
 import { Client, Guild, TextChannel, VoiceChannel } from 'discord.js';
 import { CHANNEL_IDS } from '../../config';
 import { TEAM_VOICE_CHANNELS } from './constants';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const TRAININGS_FILE = path.join(process.cwd(), 'data', 'trainings.json');
 
 export class TrainingService {
     private trainings: Map<string, Training> = new Map();
@@ -12,9 +16,133 @@ export class TrainingService {
     private pendingTeamCount: Map<string, number> = new Map();
     private pendingCaptainLimit: Map<string, number> = new Map();
     private pendingSwap: Map<string, { playerId: string; teamId: number }> = new Map();
+    private memberNameCache: Map<string, { name: string; timestamp: number }> = new Map();
+    private readonly CACHE_TTL = 5 * 60 * 1000;
 
     constructor() {
         this.rankingService = new RankingService();
+        this.loadTrainings();
+    }
+
+    async getMemberName(guild: Guild, playerId: string): Promise<string> {
+        const cached = this.memberNameCache.get(playerId);
+        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+            return cached.name;
+        }
+
+        try {
+            const member = await guild.members.fetch(playerId);
+            const name = member.displayName || member.user.username;
+            this.memberNameCache.set(playerId, { name, timestamp: Date.now() });
+            return name;
+        } catch {
+            return 'Desconhecido';
+        }
+    }
+
+    async getMemberNames(guild: Guild, playerIds: string[]): Promise<Map<string, string>> {
+        const result = new Map<string, string>();
+        const toFetch: string[] = [];
+
+        for (const id of playerIds) {
+            const cached = this.memberNameCache.get(id);
+            if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+                result.set(id, cached.name);
+            } else {
+                toFetch.push(id);
+            }
+        }
+
+        await Promise.all(
+            toFetch.map(async (id) => {
+                const name = await this.getMemberName(guild, id);
+                result.set(id, name);
+            })
+        );
+
+        return result;
+    }
+
+    findTrainingMessage(messageId: string): string | undefined {
+        if (this.trainings.has(messageId)) {
+            return messageId;
+        }
+        return undefined;
+    }
+
+    private loadTrainings(): void {
+        try {
+            if (fs.existsSync(TRAININGS_FILE)) {
+                const data = JSON.parse(fs.readFileSync(TRAININGS_FILE, 'utf-8'));
+                const now = Date.now();
+                const MAX_AGE = 24 * 60 * 60 * 1000;
+
+                for (const [key, value] of Object.entries(data.trainings || {})) {
+                    const training = value as Training;
+                    if (training.participants.length === 0 && training.status === 'inscricao') {
+                        continue;
+                    }
+                    this.trainings.set(key, training);
+                }
+                for (const [key, value] of Object.entries(data.pendingTeamCount || {})) {
+                    if (this.trainings.has(key)) {
+                        this.pendingTeamCount.set(key, value as number);
+                    }
+                }
+                for (const [key, value] of Object.entries(data.pendingCaptainLimit || {})) {
+                    if (this.trainings.has(key)) {
+                        this.pendingCaptainLimit.set(key, value as number);
+                    }
+                }
+            }
+        } catch {}
+    }
+
+    cleanupOldTrainings(): void {
+        const toDelete: string[] = [];
+        const now = Date.now();
+        const MAX_AGE_EMPTY = 30 * 60 * 1000;
+        const MAX_AGE_OLD = 12 * 60 * 60 * 1000;
+
+        for (const [id, training] of this.trainings) {
+            const age = training.createdAt ? now - training.createdAt : MAX_AGE_OLD + 1;
+            
+            if (training.participants.length === 0 && training.status === 'inscricao') {
+                toDelete.push(id);
+            }
+            else if (age > MAX_AGE_EMPTY && training.participants.length === 0) {
+                toDelete.push(id);
+            }
+            else if (age > MAX_AGE_OLD && training.status !== 'andamento') {
+                toDelete.push(id);
+            }
+        }
+        
+        for (const id of toDelete) {
+            this.trainings.delete(id);
+            this.pendingTeamCount.delete(id);
+            this.pendingCaptainLimit.delete(id);
+            this.pendingSwap.delete(id);
+        }
+        
+        if (toDelete.length > 0) {
+            this.saveTrainings();
+        }
+    }
+
+    private saveTrainings(): void {
+        try {
+            const dir = path.dirname(TRAININGS_FILE);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            const data = {
+                trainings: Object.fromEntries(this.trainings),
+                pendingTeamCount: Object.fromEntries(this.pendingTeamCount),
+                pendingCaptainLimit: Object.fromEntries(this.pendingCaptainLimit),
+            };
+            fs.writeFileSync(TRAININGS_FILE, JSON.stringify(data, null, 2));
+        } catch {}
     }
 
     setPendingTeamCount(messageId: string, count: number): void {
@@ -54,6 +182,8 @@ export class TrainingService {
     }
 
     createTraining(messageId: string): Training {
+        this.cleanupOldTrainings();
+        
         const training: Training = {
             messageId,
             participants: [],
@@ -62,9 +192,11 @@ export class TrainingService {
             currentBracketIndex: 0,
             highlights: [],
             status: 'inscricao',
+            createdAt: Date.now(),
         };
 
         this.trainings.set(messageId, training);
+        this.saveTrainings();
         return training;
     }
 
@@ -90,6 +222,8 @@ export class TrainingService {
                 this.pendingCaptainLimit.delete(oldId);
                 this.pendingCaptainLimit.set(newId, captainLimit);
             }
+
+            this.saveTrainings();
         }
     }
 
@@ -99,6 +233,7 @@ export class TrainingService {
 
         if (!training.participants.includes(playerId)) {
             training.participants.push(playerId);
+            this.saveTrainings();
             return true;
         }
         return false;
@@ -111,6 +246,7 @@ export class TrainingService {
         const index = training.participants.indexOf(playerId);
         if (index !== -1) {
             training.participants.splice(index, 1);
+            this.saveTrainings();
             return true;
         }
         return false;
@@ -136,6 +272,7 @@ export class TrainingService {
         team1.players[idx1] = player2Id;
         team2.players[idx2] = player1Id;
 
+        this.saveTrainings();
         return true;
     }
 
@@ -152,6 +289,7 @@ export class TrainingService {
 
         if (!team.players.includes(playerId)) {
             team.players.push(playerId);
+            this.saveTrainings();
             return true;
         }
         return false;
@@ -169,6 +307,7 @@ export class TrainingService {
                 if (partIdx !== -1) {
                     training.participants.splice(partIdx, 1);
                 }
+                this.saveTrainings();
                 return true;
             }
         }
@@ -353,6 +492,7 @@ export class TrainingService {
         training.brackets = this.generateBrackets(teamCount);
         training.status = 'sorteio';
 
+        this.saveTrainings();
         return true;
     }
 
@@ -403,6 +543,7 @@ export class TrainingService {
         if (training) {
             training.status = 'andamento';
             training.currentBracketIndex = 0;
+            this.saveTrainings();
         }
     }
 
@@ -415,6 +556,7 @@ export class TrainingService {
                 bracket.roomCode = undefined;
             }
             training.champion = undefined;
+            this.saveTrainings();
         }
     }
 
@@ -476,6 +618,7 @@ export class TrainingService {
             training.status = 'finalizado';
         }
 
+        this.saveTrainings();
         return true;
     }
 
@@ -500,6 +643,7 @@ export class TrainingService {
             }
         }
 
+        this.saveTrainings();
         return true;
     }
 
@@ -533,6 +677,7 @@ export class TrainingService {
         if (!bracket) return false;
 
         bracket.roomCode = roomCode;
+        this.saveTrainings();
         return true;
     }
 
@@ -542,6 +687,7 @@ export class TrainingService {
 
         if (!training.highlights.includes(playerId)) {
             training.highlights.push(playerId);
+            this.saveTrainings();
             return true;
         }
         return false;
@@ -554,6 +700,7 @@ export class TrainingService {
         const index = training.highlights.indexOf(playerId);
         if (index !== -1) {
             training.highlights.splice(index, 1);
+            this.saveTrainings();
             return true;
         }
         return false;
@@ -564,6 +711,7 @@ export class TrainingService {
         if (!training) return false;
 
         training.mvpId = playerId;
+        this.saveTrainings();
 
         let username = playerId;
         try {
@@ -596,6 +744,12 @@ export class TrainingService {
         }
 
         await this.sendTrainingSummary(training, guild, client);
+
+        this.trainings.delete(messageId);
+        this.pendingTeamCount.delete(messageId);
+        this.pendingCaptainLimit.delete(messageId);
+        this.pendingSwap.delete(messageId);
+        this.saveTrainings();
     }
 
     private async sendTrainingSummary(training: Training, guild: Guild, client: Client): Promise<void> {

@@ -5,17 +5,19 @@ import { commandManager } from '../modules/commands';
 export default new Event({
     name: 'messageCreate',
     async run(message) {
-        if (message.author.bot) return;
-        if (!message.guild) return;
+        try {
+            if (message.author.bot) return;
+            if (!message.guild) return;
 
-        const content = message.content.trim();
+            const content = message.content.trim();
 
-        if (commandManager.isCommand(content)) {
-            await commandManager.handleCommand(message);
-            return;
-        }
+            if (commandManager.isCommand(content)) {
+                await commandManager.handleCommand(message);
+                return;
+            }
 
-        await handleInfluencerPost(message);
+            await handleInfluencerPost(message);
+        } catch {}
     },
 });
 

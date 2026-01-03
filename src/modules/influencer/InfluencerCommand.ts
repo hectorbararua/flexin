@@ -55,7 +55,7 @@ export default new Command({
         if (!member.roles.cache.has(INFLUENCER_ROLE_IDS.ADMIN)) {
             await interaction.reply({
                 content: '❌ Você não tem permissão para gerenciar influencers.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -66,7 +66,7 @@ export default new Command({
         if (!guild) {
             await interaction.reply({
                 content: '❌ Este comando só pode ser usado em um servidor.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -95,12 +95,12 @@ async function handleAdicionar(
     if (user.bot) {
         await interaction.reply({
             content: '❌ Você não pode adicionar um bot como influencer.',
-            ephemeral: true,
+            flags: 64,
         });
         return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const result = await influencerService.addInfluencer(
         user.id,
@@ -127,7 +127,7 @@ async function handleRemover(
 ): Promise<void> {
     const user = options.getUser('usuario', true);
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const result = await influencerService.removeInfluencer(user.id, guild);
 
@@ -147,7 +147,7 @@ async function handleListar(
     interaction: CommandInteraction,
     guild: Guild
 ): Promise<void> {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const influencers = influencerService.getAllInfluencers();
     

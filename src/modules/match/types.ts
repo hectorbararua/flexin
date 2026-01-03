@@ -24,6 +24,7 @@ export interface Training {
     captainLimit?: number;
     selectedCaptains?: string[];
     status: 'inscricao' | 'sorteio' | 'andamento' | 'finalizado';
+    createdAt?: number;
 }
 
 export const POINTS = {

@@ -156,8 +156,7 @@ export class PostService {
             );
 
             return { success: true, message: officialMessage };
-        } catch (error) {
-            console.error('Error creating official post:', error);
+        } catch {
             return { success: false, error: 'Erro ao criar o post oficial.' };
         }
     }
@@ -188,8 +187,7 @@ export class PostService {
 
             this.postRepo.setThreadId(message.id, thread.id);
             return thread;
-        } catch (error) {
-            console.error('Error creating thread:', error);
+        } catch {
             return null;
         }
     }
@@ -214,8 +212,7 @@ export class PostService {
             await message.delete();
             this.postRepo.delete(messageId);
             return { success: true };
-        } catch (error) {
-            console.error('Error deleting post:', error);
+        } catch {
             return { success: false, error: 'Erro ao deletar o post.' };
         }
     }

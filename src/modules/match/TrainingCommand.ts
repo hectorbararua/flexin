@@ -99,112 +99,122 @@ export default new Command({
 });
 
 async function handleParticipar(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+    try {
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    const added = trainingService.addParticipant(interaction.message.id, interaction.user.id);
-    if (!added) {
-        await interaction.reply({ content: 'Você já está participando!', ephemeral: true });
-        return;
-    }
+        const added = trainingService.addParticipant(interaction.message.id, interaction.user.id);
+        if (!added) {
+            await interaction.reply({ content: 'Você já está participando!', flags: 64 });
+            return;
+        }
 
-    const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
-    const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+        const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
+        const buttons = TrainingButtonBuilder.buildInscricaoButtons();
 
-    await interaction.update({
-        embeds: [embed],
-        components: buttons.map(r => r.toJSON()),
-    });
+        await interaction.update({
+            embeds: [embed],
+            components: buttons.map(r => r.toJSON()),
+        });
+    } catch {}
 }
 
 async function handleSair(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+    try {
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    const removed = trainingService.removeParticipant(interaction.message.id, interaction.user.id);
-    if (!removed) {
-        await interaction.reply({ content: 'Você não está participando!', ephemeral: true });
-        return;
-    }
+        const removed = trainingService.removeParticipant(interaction.message.id, interaction.user.id);
+        if (!removed) {
+            await interaction.reply({ content: 'Você não está participando!', flags: 64 });
+            return;
+        }
 
-    const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
-    const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+        const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
+        const buttons = TrainingButtonBuilder.buildInscricaoButtons();
 
-    await interaction.update({
-        embeds: [embed],
-        components: buttons.map(r => r.toJSON()),
-    });
+        await interaction.update({
+            embeds: [embed],
+            components: buttons.map(r => r.toJSON()),
+        });
+    } catch {}
 }
 
 async function handleSortear(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão para sortear times.', ephemeral: true });
-        return;
-    }
+    try {
+        if (!PermissionGuard.canRemovePlayer(interaction)) {
+            await interaction.reply({ content: 'Você não tem permissão para sortear times.', flags: 64 });
+            return;
+        }
 
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    if (training.participants.length < 4) {
-        await interaction.reply({ content: '❌ Mínimo de **4 participantes** para sortear!\n(2 jogadores por time × 2 times)', ephemeral: true });
-        return;
-    }
+        if (training.participants.length < 4) {
+            await interaction.reply({ content: '❌ Mínimo de **4 participantes** para sortear!\n(2 jogadores por time × 2 times)', flags: 64 });
+            return;
+        }
 
-    const rows = TrainingButtonBuilder.buildTeamCountButtons(training.participants.length);
+        const rows = TrainingButtonBuilder.buildTeamCountButtons(training.participants.length);
 
-    await interaction.update({
-        content: `**Quantos times?** (${training.participants.length} participantes)`,
-        embeds: [],
-        components: rows.map(r => r.toJSON()),
-    });
+        await interaction.update({
+            content: `**Quantos times?** (${training.participants.length} participantes)`,
+            embeds: [],
+            components: rows.map(r => r.toJSON()),
+        });
+    } catch {}
 }
 
 async function handleVoltar(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+    try {
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
-    const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+        const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
+        const buttons = TrainingButtonBuilder.buildInscricaoButtons();
 
-    await interaction.update({
-        content: '',
-        embeds: [embed],
-        components: buttons.map(r => r.toJSON()),
-    });
+        await interaction.update({
+            content: '',
+            embeds: [embed],
+            components: buttons.map(r => r.toJSON()),
+        });
+    } catch {}
 }
 
 async function handleVoltarTimes(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+    try {
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    const rows = TrainingButtonBuilder.buildTeamCountButtons(training.participants.length);
+        const rows = TrainingButtonBuilder.buildTeamCountButtons(training.participants.length);
 
-    await interaction.update({
-        content: `**Quantos times?** (${training.participants.length} participantes)`,
-        embeds: [],
-        components: rows.map(r => r.toJSON()),
-    });
+        await interaction.update({
+            content: `**Quantos times?** (${training.participants.length} participantes)`,
+            embeds: [],
+            components: rows.map(r => r.toJSON()),
+        });
+    } catch {}
 }
 
 async function handleVoltarCapitaes(interaction: ButtonInteraction<CacheType>): Promise<void> {
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -229,7 +239,7 @@ async function handleVoltarCapitaes(interaction: ButtonInteraction<CacheType>): 
 async function handleVoltarSorteio(interaction: ButtonInteraction<CacheType>): Promise<void> {
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -246,45 +256,42 @@ async function handleVoltarSorteio(interaction: ButtonInteraction<CacheType>): P
 }
 
 async function handleRemoverParticipante(interaction: ButtonInteraction<CacheType>): Promise<void> {
-    if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
-        return;
-    }
+    try {
+        if (!PermissionGuard.canRemovePlayer(interaction)) {
+            await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
+            return;
+        }
 
-    const training = trainingService.getTraining(interaction.message.id);
-    if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
-        return;
-    }
+        const training = trainingService.getTraining(interaction.message.id);
+        if (!training) {
+            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            return;
+        }
 
-    if (training.participants.length === 0) {
-        await interaction.reply({ content: 'Não há participantes para remover.', ephemeral: true });
-        return;
-    }
+        if (training.participants.length === 0) {
+            await interaction.reply({ content: 'Não há participantes para remover.', flags: 64 });
+            return;
+        }
 
-    const options = await Promise.all(
-        training.participants.slice(0, 25).map(async (playerId) => {
-            let name = 'Desconhecido';
-            try {
-                const member = await interaction.guild!.members.fetch(playerId);
-                name = member.displayName || member.user.username;
-            } catch {}
-            return new StringSelectMenuOptionBuilder().setLabel(name).setValue(playerId);
-        })
-    );
+        await interaction.deferReply({ flags: 64 });
 
-    const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('treino_select_remover')
-        .setPlaceholder('Escolha um participante para remover')
-        .addOptions(options);
+        const names = await trainingService.getMemberNames(interaction.guild!, training.participants.slice(0, 25));
+        const options = training.participants.slice(0, 25).map((playerId) => 
+            new StringSelectMenuOptionBuilder().setLabel(names.get(playerId) || 'Desconhecido').setValue(playerId)
+        );
 
-    const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId('treino_select_remover')
+            .setPlaceholder('Escolha um participante para remover')
+            .addOptions(options);
 
-    await interaction.reply({
-        content: '🗑️ Escolha um participante para remover:',
-        components: [row.toJSON()],
-        ephemeral: true,
-    });
+        const row = new ActionRowBuilder<StringSelectMenuBuilder>({ components: [selectMenu] });
+
+        await interaction.editReply({
+            content: '🗑️ Escolha um participante para remover:',
+            components: [row.toJSON()],
+        });
+    } catch {}
 }
 
 async function handleSelectRemover(interaction: StringSelectMenuInteraction<CacheType>): Promise<void> {
@@ -294,7 +301,7 @@ async function handleSelectRemover(interaction: StringSelectMenuInteraction<Cach
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -317,7 +324,7 @@ async function handleSelectRemover(interaction: StringSelectMenuInteraction<Cach
 async function handleTeamCount(interaction: ButtonInteraction<CacheType>, count: number): Promise<void> {
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -327,7 +334,7 @@ async function handleTeamCount(interaction: ButtonInteraction<CacheType>, count:
     if (training.participants.length < minPlayersNeeded || !isDivisible) {
         await interaction.reply({ 
             content: `❌ Não é possível criar ${count} times equilibrados com ${training.participants.length} participantes!`, 
-            ephemeral: true 
+            flags: 64 
         });
         return;
     }
@@ -449,13 +456,13 @@ async function handleSelectCaptains(interaction: StringSelectMenuInteraction<Cac
 
 async function handleRessortear(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -472,13 +479,13 @@ async function handleRessortear(interaction: ButtonInteraction<CacheType>): Prom
 
 async function handleConfirmar(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -501,13 +508,13 @@ async function handleConfirmar(interaction: ButtonInteraction<CacheType>): Promi
 
 async function handleTrocarJogadores(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -537,7 +544,7 @@ async function handleTrocarJogadores(interaction: ButtonInteraction<CacheType>):
     await interaction.reply({
         content: '🔀 **Trocar Jogadores**\nEscolha o primeiro jogador:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -549,7 +556,7 @@ async function handleSelectTrocarOrigem(interaction: StringSelectMenuInteraction
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -595,7 +602,7 @@ async function handleSelectTrocarDestino(interaction: StringSelectMenuInteractio
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -629,13 +636,13 @@ async function handleSelectTrocarDestino(interaction: StringSelectMenuInteractio
 
 async function handleAdicionarJogador(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -658,7 +665,7 @@ async function handleAdicionarJogador(interaction: ButtonInteraction<CacheType>)
     await interaction.reply({
         content: '➕ **Adicionar Jogador**\nEscolha o time:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -669,7 +676,7 @@ async function handleSelectAdicionarTime(interaction: StringSelectMenuInteractio
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -698,13 +705,13 @@ async function handleSelectAdicionarJogador(interaction: StringSelectMenuInterac
 
 async function handleRemoverDoTime(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -734,7 +741,7 @@ async function handleRemoverDoTime(interaction: ButtonInteraction<CacheType>): P
     await interaction.reply({
         content: '➖ **Remover Jogador**\nEscolha quem remover:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -745,7 +752,7 @@ async function handleSelectRemoverDoTime(interaction: StringSelectMenuInteractio
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -772,17 +779,17 @@ async function handleSelectRemoverDoTime(interaction: StringSelectMenuInteractio
 
 async function handleMoverTimes(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const guild = interaction.guild;
     if (!guild) {
-        await interaction.reply({ content: 'Erro ao acessar o servidor.', ephemeral: true });
+        await interaction.reply({ content: 'Erro ao acessar o servidor.', flags: 64 });
         return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     const result = await trainingService.moveTrainingTeamsToVoice(interaction.message.id, guild);
 
@@ -793,7 +800,7 @@ async function handleMoverTimes(interaction: ButtonInteraction<CacheType>): Prom
 
 export async function handleVencedorDynamic(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
@@ -803,7 +810,7 @@ export async function handleVencedorDynamic(interaction: ButtonInteraction<Cache
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -813,7 +820,7 @@ export async function handleVencedorDynamic(interaction: ButtonInteraction<Cache
 
 export async function handleSalaDynamic(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
@@ -822,7 +829,7 @@ export async function handleSalaDynamic(interaction: ButtonInteraction<CacheType
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -857,7 +864,7 @@ export async function handleSalaModal(interaction: ModalSubmitInteraction<CacheT
 
     const training = trainingService.getTraining(messageId);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -902,20 +909,20 @@ export async function handleAdicionarModal(interaction: ModalSubmitInteraction<C
 
     const training = trainingService.getTraining(messageId);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
     try {
         await interaction.guild?.members.fetch(userId);
     } catch {
-        await interaction.reply({ content: '❌ Usuário não encontrado no servidor.', ephemeral: true });
+        await interaction.reply({ content: '❌ Usuário não encontrado no servidor.', flags: 64 });
         return;
     }
 
     const success = trainingService.addPlayerToTeam(messageId, userId, teamId);
     if (!success) {
-        await interaction.reply({ content: '❌ Erro ao adicionar jogador.', ephemeral: true });
+        await interaction.reply({ content: '❌ Erro ao adicionar jogador.', flags: 64 });
         return;
     }
 
@@ -932,12 +939,12 @@ export async function handleAdicionarModal(interaction: ModalSubmitInteraction<C
         });
     }
 
-    await interaction.reply({ content: `✅ <@${userId}> adicionado ao Time ${teamId}!`, ephemeral: true });
+    await interaction.reply({ content: `✅ <@${userId}> adicionado ao Time ${teamId}!`, flags: 64 });
 }
 
 async function handleProximaFase(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
@@ -989,20 +996,20 @@ async function updatePartidaDisplay(interaction: ButtonInteraction<CacheType>): 
 
 async function handleAddDestaque(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
     const availablePlayers = training.participants.filter(p => !training.highlights.includes(p));
 
     if (availablePlayers.length === 0) {
-        await interaction.reply({ content: 'Todos os jogadores já são destaques!', ephemeral: true });
+        await interaction.reply({ content: 'Todos os jogadores já são destaques!', flags: 64 });
         return;
     }
 
@@ -1027,7 +1034,7 @@ async function handleAddDestaque(interaction: ButtonInteraction<CacheType>): Pro
     await interaction.reply({
         content: '⭐ Escolha um jogador para adicionar como destaque:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -1038,7 +1045,7 @@ async function handleSelectDestaque(interaction: StringSelectMenuInteraction<Cac
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1060,13 +1067,13 @@ async function handleSelectDestaque(interaction: StringSelectMenuInteraction<Cac
 
 async function handleDefinirMvp(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1091,7 +1098,7 @@ async function handleDefinirMvp(interaction: ButtonInteraction<CacheType>): Prom
     await interaction.reply({
         content: '🏅 Escolha o MVP do treino:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -1102,7 +1109,7 @@ async function handleSelectMvp(interaction: StringSelectMenuInteraction<CacheTyp
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1124,18 +1131,18 @@ async function handleSelectMvp(interaction: StringSelectMenuInteraction<CacheTyp
 
 async function handleRemoverDestaque(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
     if (training.highlights.length === 0) {
-        await interaction.reply({ content: 'Não há destaques para remover.', ephemeral: true });
+        await interaction.reply({ content: 'Não há destaques para remover.', flags: 64 });
         return;
     }
 
@@ -1160,7 +1167,7 @@ async function handleRemoverDestaque(interaction: ButtonInteraction<CacheType>):
     await interaction.reply({
         content: '➖ Escolha um destaque para remover:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -1171,7 +1178,7 @@ async function handleSelectRemoverDestaque(interaction: StringSelectMenuInteract
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1193,13 +1200,13 @@ async function handleSelectRemoverDestaque(interaction: StringSelectMenuInteract
 
 async function handleTrocarMvp(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1224,26 +1231,26 @@ async function handleTrocarMvp(interaction: ButtonInteraction<CacheType>): Promi
     await interaction.reply({
         content: '🔄 Escolha o novo MVP:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
 async function handleDesfazerVencedor(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
     const resolvedBrackets = trainingService.getResolvedBrackets(interaction.message.id);
     
     if (resolvedBrackets.length === 0) {
-        await interaction.reply({ content: 'Não há vencedores definidos para desfazer.', ephemeral: true });
+        await interaction.reply({ content: 'Não há vencedores definidos para desfazer.', flags: 64 });
         return;
     }
 
@@ -1263,7 +1270,7 @@ async function handleDesfazerVencedor(interaction: ButtonInteraction<CacheType>)
     await interaction.reply({
         content: '↩️ **Desfazer Vencedor**\nEscolha qual resultado você quer desfazer:',
         components: [row.toJSON()],
-        ephemeral: true,
+        flags: 64,
     });
 }
 
@@ -1274,7 +1281,7 @@ async function handleSelectDesfazerVencedor(interaction: StringSelectMenuInterac
     const trainingMessage = messages?.find(m => trainingService.getTraining(m.id));
 
     if (!trainingMessage) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 
@@ -1320,13 +1327,13 @@ async function handleSelectDesfazerVencedor(interaction: StringSelectMenuInterac
 
 async function handleFinalizar(interaction: ButtonInteraction<CacheType>): Promise<void> {
     if (!PermissionGuard.canRemovePlayer(interaction)) {
-        await interaction.reply({ content: 'Você não tem permissão.', ephemeral: true });
+        await interaction.reply({ content: 'Você não tem permissão.', flags: 64 });
         return;
     }
 
     const training = trainingService.getTraining(interaction.message.id);
     if (!training) {
-        await interaction.reply({ content: 'Treino não encontrado.', ephemeral: true });
+        await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
         return;
     }
 

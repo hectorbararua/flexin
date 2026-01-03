@@ -59,8 +59,7 @@ export class RoleHistoryHandler implements ICommandHandler {
             });
 
             return { success: true };
-        } catch (error) {
-            console.error('Error fetching role history:', error);
+        } catch {
             return { success: false, message: '❌ Erro ao buscar histórico de cargos.' };
         }
     }

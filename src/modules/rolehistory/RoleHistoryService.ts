@@ -79,9 +79,7 @@ export class RoleHistoryService {
                     }
                 }
             }
-        } catch (error) {
-            console.error('Error fetching role history:', error);
-        }
+        } catch {}
 
         return changes;
     }
@@ -198,12 +196,12 @@ export class RoleHistoryService {
 
         const session = this.sessions.get(messageId);
         if (!session) {
-            await interaction.reply({ content: '❌ Sessão expirada.', ephemeral: true });
+            await interaction.reply({ content: '❌ Sessão expirada.', flags: 64 });
             return;
         }
 
         if (interaction.user.id !== session.requester.id) {
-            await interaction.reply({ content: '❌ Apenas quem executou o comando pode navegar.', ephemeral: true });
+            await interaction.reply({ content: '❌ Apenas quem executou o comando pode navegar.', flags: 64 });
             return;
         }
 

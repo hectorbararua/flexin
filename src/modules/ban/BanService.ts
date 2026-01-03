@@ -226,7 +226,7 @@ export class BanService {
         if (!context.isOwner) {
             await interaction.reply({
                 content: BAN_MESSAGES.ERROR_ONLY_OWNERS,
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -255,7 +255,7 @@ export class BanService {
         if (!context.isOwner) {
             await interaction.reply({
                 content: BAN_MESSAGES.ERROR_ONLY_OWNERS,
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -265,10 +265,10 @@ export class BanService {
         if (interaction.customId === BAN_CUSTOM_IDS.BLACKLIST_ADD_MODAL) {
             const reason = interaction.fields.getTextInputValue(BAN_CUSTOM_IDS.BLACKLIST_REASON_INPUT);
             const result = await this.addToBlacklist(guild, userId, reason, context);
-            await interaction.reply({ content: result.message, ephemeral: true });
+            await interaction.reply({ content: result.message, flags: 64 });
         } else if (interaction.customId === BAN_CUSTOM_IDS.BLACKLIST_REMOVE_MODAL) {
             const result = await this.removeFromBlacklist(guild, userId, context);
-            await interaction.reply({ content: result.message, ephemeral: true });
+            await interaction.reply({ content: result.message, flags: 64 });
         }
     }
 
@@ -278,7 +278,7 @@ export class BanService {
 
         await interaction.reply({
             embeds: [embed],
-            ephemeral: true,
+            flags: 64,
         });
     }
 

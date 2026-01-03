@@ -77,8 +77,7 @@ export class CommandManager {
                     await this.sendTempMessage(channel, result.message);
                 }
             }
-        } catch (error) {
-            console.error(`Error executing command ${commandName}:`, error);
+        } catch {
             await this.sendTempMessage(channel, '❌ Erro ao executar o comando.');
         }
     }

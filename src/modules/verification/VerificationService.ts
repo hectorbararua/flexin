@@ -57,7 +57,7 @@ export class VerificationService {
         if (!guild) {
             await interaction.reply({
                 content: '❌ Erro ao processar verificação.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -67,7 +67,7 @@ export class VerificationService {
             const minutes = Math.ceil(cooldownRemaining / 60000);
             await interaction.reply({
                 content: `❌ Aguarde **${minutes} minuto(s)** antes de solicitar novamente.`,
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -76,27 +76,27 @@ export class VerificationService {
         if (existingRequest) {
             await interaction.reply({
                 content: '❌ Você já possui uma solicitação de verificação pendente.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
 
+        await interaction.deferReply({ flags: 64 });
+
         const verifiers = await this.fetchVerifiers(guild);
 
         if (verifiers.length === 0) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: '❌ Nenhum verificador disponível no momento.',
-                ephemeral: true,
             });
             return;
         }
 
         const selectMenu = VerificationButtonBuilder.buildVerifierSelect(verifiers);
 
-        await interaction.reply({
+        await interaction.editReply({
             content: `**${VERIFICATION_MESSAGES.QUESTION}**`,
             components: [selectMenu],
-            ephemeral: true,
         });
     }
 
@@ -107,7 +107,7 @@ export class VerificationService {
         if (!guild) {
             await interaction.reply({
                 content: '❌ Erro ao processar verificação.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -118,7 +118,7 @@ export class VerificationService {
         } catch {
             await interaction.reply({
                 content: '❌ Verificador não encontrado.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -146,7 +146,7 @@ export class VerificationService {
         if (!approvalChannel) {
             await interaction.reply({
                 content: '❌ Canal de aprovação não encontrado.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -181,7 +181,7 @@ export class VerificationService {
         if (!request) {
             await interaction.reply({
                 content: '❌ Solicitação não encontrada.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -189,7 +189,7 @@ export class VerificationService {
         if (request.status !== 'pending') {
             await interaction.reply({
                 content: '❌ Esta solicitação já foi processada.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -198,7 +198,7 @@ export class VerificationService {
         if (!guild) {
             await interaction.reply({
                 content: '❌ Erro ao processar.',
-                ephemeral: true,
+                flags: 64,
             });
             return;
         }
@@ -272,14 +272,14 @@ export class VerificationService {
         const verifiers: VerifierOption[] = [];
         const seenIds = new Set<string>();
 
-        await guild.members.fetch();
-
         for (const roleId of VERIFICATION_CONFIG.verifierRoleIds) {
             try {
                 const role = await guild.roles.fetch(roleId);
                 if (!role) continue;
 
-                for (const [memberId, member] of role.members) {
+                const membersWithRole = role.members;
+                
+                for (const [memberId, member] of membersWithRole) {
                     if (seenIds.has(memberId)) continue;
                     seenIds.add(memberId);
 

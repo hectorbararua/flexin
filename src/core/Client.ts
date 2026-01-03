@@ -40,6 +40,9 @@ export class ExtendedClient extends Client {
 
         this.commandLoader = new CommandLoader();
         this.eventLoader = new EventLoader(this);
+        
+        this.on('error', () => {});
+        this.on('shardError', () => {});
     }
 
     async start(): Promise<void> {
