@@ -1,9 +1,11 @@
 import { 
     ActionRowBuilder,
     ApplicationCommandType, 
+    ApplicationCommandOptionType,
     ButtonInteraction,
     CacheType,
     Collection,
+    GuildMember,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
     StringSelectMenuOptionBuilder,
@@ -20,13 +22,27 @@ import { TrainingEmbedBuilder } from './TrainingEmbedBuilder';
 import { TrainingButtonBuilder } from './TrainingButtonBuilder';
 import { captainsRepository } from '../captains/CaptainsRepository';
 import { TRAINING_CUSTOM_IDS } from './constants';
+import { TrainingType } from './types';
+import { SPECIAL_ROLES } from '../../config/roles';
 
 export default new Command({
     name: 'iniciar',
     description: 'Inicia um treino',
     type: ApplicationCommandType.ChatInput,
+    options: [
+        {
+            name: 'tipo',
+            description: 'Tipo do treino',
+            type: ApplicationCommandOptionType.String,
+            required: true,
+            choices: [
+                { name: '🎮 Normal', value: 'normal' },
+                { name: '🎀 Feminino', value: 'feminino' },
+            ],
+        },
+    ],
 
-    async run({ interaction }) {
+    async run({ interaction, options }) {
         if (!PermissionGuard.canUseCommand(interaction)) {
             await interaction.reply({
                 content: 'Você não tem permissão para usar este comando.',
@@ -37,7 +53,8 @@ export default new Command({
 
         await interaction.deferReply();
 
-        const training = trainingService.createTraining(interaction.id);
+        const tipo = (options.getString('tipo') || 'normal') as TrainingType;
+        const training = trainingService.createTraining(interaction.id, tipo);
         const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
         const buttons = TrainingButtonBuilder.buildInscricaoButtons();
 
@@ -64,6 +81,10 @@ export default new Command({
         ['treino_times_4', (i) => handleTeamCount(i, 4)],
         ['treino_times_5', (i) => handleTeamCount(i, 5)],
         ['treino_times_6', (i) => handleTeamCount(i, 6)],
+        ['treino_times_7', (i) => handleTeamCount(i, 7)],
+        ['treino_times_8', (i) => handleTeamCount(i, 8)],
+        ['treino_times_9', (i) => handleTeamCount(i, 9)],
+        ['treino_times_10', (i) => handleTeamCount(i, 10)],
         ['treino_captain_0', (i) => handleCaptainLimit(i, 0)],
         ['treino_captain_1', (i) => handleCaptainLimit(i, 1)],
         ['treino_captain_2', (i) => handleCaptainLimit(i, 2)],
@@ -100,50 +121,92 @@ export default new Command({
 
 async function handleParticipar(interaction: ButtonInteraction<CacheType>): Promise<void> {
     try {
+        await interaction.deferUpdate().catch(() => {});
+
         const training = trainingService.getTraining(interaction.message.id);
         if (!training) {
-            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            await interaction.followUp({ content: 'Treino não encontrado.', flags: 64 }).catch(() => {});
             return;
+        }
+
+        // Verifica se o treino é feminino e se a pessoa tem o cargo
+        if (training.type === 'feminino') {
+            const member = interaction.member as GuildMember;
+            if (!member.roles.cache.has(SPECIAL_ROLES.FEMININO)) {
+                await interaction.followUp({ 
+                    content: '❌ Este treino é exclusivo para membros com o cargo **Feminino**!', 
+                    flags: 64 
+                }).catch(() => {});
+                return;
+            }
         }
 
         const added = trainingService.addParticipant(interaction.message.id, interaction.user.id);
         if (!added) {
-            await interaction.reply({ content: 'Você já está participando!', flags: 64 });
+            await interaction.followUp({ content: 'Você já está participando!', flags: 64 }).catch(() => {});
             return;
         }
 
-        const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
-        const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+        // Usa debounce para juntar múltiplos cliques em uma única atualização
+        const message = interaction.message;
+        trainingService.scheduleEmbedUpdate(interaction.message.id, async () => {
+            const currentTraining = trainingService.getTraining(message.id);
+            if (!currentTraining) return;
 
-        await interaction.update({
-            embeds: [embed],
-            components: buttons.map(r => r.toJSON()),
+            const embed = TrainingEmbedBuilder.buildInscricaoEmbed(currentTraining);
+            const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+
+            try {
+                await message.edit({
+                    embeds: [embed],
+                    components: buttons.map(r => r.toJSON()),
+                });
+            } catch (editError) {
+                console.error('[Treino] Falha ao atualizar embed:', editError);
+            }
         });
-    } catch {}
+    } catch (error) {
+        console.error('[Treino] Erro crítico ao participar:', error, 'User:', interaction.user.id);
+    }
 }
 
 async function handleSair(interaction: ButtonInteraction<CacheType>): Promise<void> {
     try {
+        await interaction.deferUpdate().catch(() => {});
+
         const training = trainingService.getTraining(interaction.message.id);
         if (!training) {
-            await interaction.reply({ content: 'Treino não encontrado.', flags: 64 });
+            await interaction.followUp({ content: 'Treino não encontrado.', flags: 64 }).catch(() => {});
             return;
         }
 
         const removed = trainingService.removeParticipant(interaction.message.id, interaction.user.id);
         if (!removed) {
-            await interaction.reply({ content: 'Você não está participando!', flags: 64 });
+            await interaction.followUp({ content: 'Você não está participando!', flags: 64 }).catch(() => {});
             return;
         }
 
-        const embed = TrainingEmbedBuilder.buildInscricaoEmbed(training);
-        const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+        // Usa debounce para juntar múltiplos cliques em uma única atualização
+        const message = interaction.message;
+        trainingService.scheduleEmbedUpdate(interaction.message.id, async () => {
+            const currentTraining = trainingService.getTraining(message.id);
+            if (!currentTraining) return;
 
-        await interaction.update({
-            embeds: [embed],
-            components: buttons.map(r => r.toJSON()),
+            const embed = TrainingEmbedBuilder.buildInscricaoEmbed(currentTraining);
+            const buttons = TrainingButtonBuilder.buildInscricaoButtons();
+
+            try {
+                await message.edit({
+                    embeds: [embed],
+                    components: buttons.map(r => r.toJSON()),
+                });
+            } catch (editError) {
+                console.error('[Treino] Falha ao atualizar embed:', editError);
+            }
         });
-    } catch {}
+    } catch (error) {
+        console.error('[Treino] Erro crítico ao sair:', error, 'User:', interaction.user.id);
+    }
 }
 
 async function handleSortear(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -492,18 +555,6 @@ async function handleConfirmar(interaction: ButtonInteraction<CacheType>): Promi
     trainingService.confirmTeams(interaction.message.id);
 
     await updatePartidaDisplay(interaction);
-
-    const guild = interaction.guild;
-    if (guild) {
-        const result = await trainingService.moveTrainingTeamsToVoice(interaction.message.id, guild);
-        if (result.moved > 0 || result.failed > 0) {
-            const channel = interaction.channel as TextChannel;
-            const msg = await channel?.send({
-                content: `📢 **${result.moved}** jogadores movidos para suas calls!${result.failed > 0 ? ` (**${result.failed}** não estavam em call)` : ''}`,
-            });
-            setTimeout(() => msg?.delete().catch(() => {}), 5000);
-        }
-    }
 }
 
 async function handleTrocarJogadores(interaction: ButtonInteraction<CacheType>): Promise<void> {

@@ -2,6 +2,11 @@ import { Event } from '../core/types';
 import { client } from '..';
 import { verificationService } from '../modules/verification';
 import { channelConfig } from '../config/ChannelConfigService';
+import { RankingService } from '../modules/ranking/RankingService';
+import { mvpService } from '../modules/mvp/MvpService';
+import { coachService } from '../modules/coach';
+
+const rankingService = new RankingService();
 
 export default new Event({
     name: 'ready',
@@ -16,6 +21,15 @@ export default new Event({
 
             await new Promise(resolve => setTimeout(resolve, 2000));
             await verificationService.initVerificationEmbed(client);
-        } catch {}
+            await coachService.initSetupEmbed(client);
+            await coachService.initLeaveCoachEmbed(client);
+
+            console.log('📊 Atualizando rankings...'.yellow);
+            await rankingService.sendRankingUpdate(client, 'normal');
+            await rankingService.sendRankingUpdate(client, 'feminino');
+            await mvpService.sendRankingUpdate(client, 'normal');
+            await mvpService.sendRankingUpdate(client, 'feminino');
+            console.log('✅ Rankings atualizados!'.green);
+        } catch { }
     },
 });

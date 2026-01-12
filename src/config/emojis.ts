@@ -5,6 +5,9 @@ export const EMOJIS = {
     SHIELD: '<:pu_correctshield_hit:1453450419929088236>',
     USERS: '<:pu_users_hit:1453450400232636689>',
     BANZADA: '<:banzada:1453760885540786236>',
+    LACO_ROSA: '🎀',
+    PONTO_ROSA: '<:pi_fatdot_hit:1453450401859764402>',
+    LIKE: '<:like:1453553969090658384>',
 } as const;
 
 export const COLORS = {
@@ -13,4 +16,5 @@ export const COLORS = {
     ERROR: '#FF0000' as const,
     WARNING: '#FFFF00' as const,
     INFO: '#00FFFF' as const,
+    FEMININO: '#FF69B4' as const,
 } as const;

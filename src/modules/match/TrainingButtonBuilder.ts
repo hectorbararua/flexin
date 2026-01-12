@@ -76,6 +76,31 @@ export class TrainingButtonBuilder {
         const row2 = new ActionRowBuilder<ButtonBuilder>({
             components: [
                 new ButtonBuilder()
+                    .setCustomId('treino_times_7')
+                    .setLabel(getLabel(7))
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!canUseTeams(7)),
+                new ButtonBuilder()
+                    .setCustomId('treino_times_8')
+                    .setLabel(getLabel(8))
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!canUseTeams(8)),
+                new ButtonBuilder()
+                    .setCustomId('treino_times_9')
+                    .setLabel(getLabel(9))
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!canUseTeams(9)),
+                new ButtonBuilder()
+                    .setCustomId('treino_times_10')
+                    .setLabel(getLabel(10))
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(!canUseTeams(10)),
+            ],
+        });
+
+        const row3 = new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
                     .setCustomId(TRAINING_CUSTOM_IDS.VOLTAR)
                     .setLabel('⬅️ Voltar')
                     .setStyle(ButtonStyle.Secondary),
@@ -86,7 +111,7 @@ export class TrainingButtonBuilder {
             ],
         });
 
-        return [row1, row2];
+        return [row1, row2, row3];
     }
 
     static buildCaptainLimitButtons(

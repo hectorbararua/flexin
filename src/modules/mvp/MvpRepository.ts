@@ -7,27 +7,34 @@ export interface MvpData {
 }
 
 type MvpDataRecord = Record<string, MvpData>;
+export type MvpType = 'normal' | 'feminino';
 
 export class MvpRepository {
     private repository: JsonRepository<MvpDataRecord>;
+    private repositoryFeminino: JsonRepository<MvpDataRecord>;
 
     constructor() {
         this.repository = new JsonRepository<MvpDataRecord>('mvp.json');
+        this.repositoryFeminino = new JsonRepository<MvpDataRecord>('mvp_feminino.json');
     }
 
-    getAll(): MvpDataRecord {
-        return this.repository.getAll();
+    private getRepo(type: MvpType = 'normal'): JsonRepository<MvpDataRecord> {
+        return type === 'feminino' ? this.repositoryFeminino : this.repository;
     }
 
-    get(userId: string): MvpData | undefined {
-        return this.repository.get(userId) as MvpData | undefined;
+    getAll(type: MvpType = 'normal'): MvpDataRecord {
+        return this.getRepo(type).getAll();
     }
 
-    addMvp(userId: string, username: string): number {
-        const current = this.get(userId);
+    get(userId: string, type: MvpType = 'normal'): MvpData | undefined {
+        return this.getRepo(type).get(userId) as MvpData | undefined;
+    }
+
+    addMvp(userId: string, username: string, type: MvpType = 'normal'): number {
+        const current = this.get(userId, type);
         const newTotal = (current?.totalMvps || 0) + 1;
 
-        this.repository.set(userId, {
+        this.getRepo(type).set(userId, {
             odiscordUserId: userId,
             username: username,
             totalMvps: newTotal,
@@ -36,15 +43,15 @@ export class MvpRepository {
         return newTotal;
     }
 
-    getTopRanking(limit: number = 10): MvpData[] {
-        const data = this.getAll();
+    getTopRanking(limit: number = 10, type: MvpType = 'normal'): MvpData[] {
+        const data = this.getAll(type);
         return Object.values(data)
             .sort((a, b) => b.totalMvps - a.totalMvps)
             .slice(0, limit);
     }
 
-    getTop10UserIds(): string[] {
-        return this.getTopRanking(10).map(mvp => mvp.odiscordUserId);
+    getTop10UserIds(type: MvpType = 'normal'): string[] {
+        return this.getTopRanking(10, type).map(mvp => mvp.odiscordUserId);
     }
 }
 

@@ -30,6 +30,7 @@ interface InfluencerChannels {
 interface RankingChannels {
     rankingMvpChannelId: string;
     treinoResumoChannelId: string;
+    rankingPontosChannelId?: string;
 }
 
 interface ChannelsConfig {
@@ -39,6 +40,7 @@ interface ChannelsConfig {
     ban: BanChannels;
     influencer: InfluencerChannels;
     ranking: RankingChannels;
+    rankingFeminino: RankingChannels;
 }
 
 export class ChannelConfigService {
@@ -87,6 +89,10 @@ export class ChannelConfigService {
         return this.config.ranking;
     }
 
+    get rankingFeminino(): RankingChannels {
+        return this.config.rankingFeminino;
+    }
+
     getAllConfiguredChannelIds(): string[] {
         const ids: string[] = [];
 
@@ -102,6 +108,8 @@ export class ChannelConfigService {
         if (this.config.influencer.youtubeChannelId) ids.push(this.config.influencer.youtubeChannelId);
         if (this.config.ranking.rankingMvpChannelId) ids.push(this.config.ranking.rankingMvpChannelId);
         if (this.config.ranking.treinoResumoChannelId) ids.push(this.config.ranking.treinoResumoChannelId);
+        if (this.config.rankingFeminino?.rankingMvpChannelId) ids.push(this.config.rankingFeminino.rankingMvpChannelId);
+        if (this.config.rankingFeminino?.treinoResumoChannelId) ids.push(this.config.rankingFeminino.treinoResumoChannelId);
 
         return ids.filter(id => id !== '');
     }

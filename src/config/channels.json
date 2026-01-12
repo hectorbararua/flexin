@@ -22,6 +22,18 @@
     },
     "ranking": {
         "rankingMvpChannelId": "1453068453610258522",
-        "treinoResumoChannelId": "1453018593079066645"
+        "treinoResumoChannelId": "1453018593079066645",
+        "rankingPontosChannelId": "1453018537865252904"
+    },
+    "rankingFeminino": {
+        "rankingMvpChannelId": "1459045051920285800",
+        "treinoResumoChannelId": "1455604340264800431",
+        "rankingPontosChannelId": "1459048356599828666"
+    },
+    "coach": {
+        "trainingCategoryId": "1459056237147852872",
+        "embedChannelId": "1459057344007770246",
+        "ticketCategoryId": "1459056711296880701",
+        "requestsChannelId": "1459057439289638984"
     }
 }

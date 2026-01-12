@@ -10,6 +10,7 @@ import { NUKE_MESSAGES, NUKE_CUSTOM_IDS } from './constants';
 import { channelConfig } from '../../config/ChannelConfigService';
 import { PERMISSION_GROUPS, hasAnyRole } from '../../config/roles';
 import { verificationService } from '../verification';
+import { coachService, COACH_CHANNEL_IDS } from '../coach';
 
 interface NukeContext {
     executorId: string;
@@ -66,18 +67,12 @@ export class NukeService {
         const pendingNuke = pendingNukes.get(interaction.message.id);
 
         if (!pendingNuke) {
-            await interaction.reply({
-                content: '❌ Esta confirmação expirou.',
-                flags: 64,
-            });
+            await interaction.reply({ content: '❌ Esta confirmação expirou.', flags: 64 });
             return;
         }
 
         if (pendingNuke.executorId !== interaction.user.id) {
-            await interaction.reply({
-                content: '❌ Apenas quem solicitou pode confirmar ou cancelar.',
-                flags: 64,
-            });
+            await interaction.reply({ content: '❌ Apenas quem solicitou pode confirmar ou cancelar.', flags: 64 });
             return;
         }
 
@@ -103,7 +98,7 @@ export class NukeService {
         setTimeout(async () => {
             try {
                 await interaction.message.delete();
-            } catch {}
+            } catch { }
         }, 3000);
     }
 
@@ -112,10 +107,7 @@ export class NukeService {
         const guild = interaction.guild;
 
         if (!guild || !oldChannel) {
-            await interaction.reply({
-                content: NUKE_MESSAGES.ERROR_NUKE_FAILED,
-                flags: 64,
-            });
+            await interaction.reply({ content: NUKE_MESSAGES.ERROR_NUKE_FAILED, flags: 64 });
             return;
         }
 
@@ -123,6 +115,8 @@ export class NukeService {
             const channelProps = this.extractChannelProperties(oldChannel);
             const oldChannelId = oldChannel.id;
             const wasVerificationChannel = oldChannelId === channelConfig.verification.verificationChannelId;
+            const wasCoachChannel = oldChannelId === COACH_CHANNEL_IDS.EMBED_CHANNEL;
+            const wasLeaveCoachChannel = oldChannelId === COACH_CHANNEL_IDS.LEAVE_COACH_CHANNEL;
 
             await oldChannel.delete();
 
@@ -146,7 +140,15 @@ export class NukeService {
             if (wasVerificationChannel) {
                 await verificationService.sendVerificationEmbed(newChannel);
             }
-        } catch {}
+
+            if (wasCoachChannel) {
+                await coachService.sendSetupEmbed(newChannel);
+            }
+
+            if (wasLeaveCoachChannel) {
+                await coachService.sendLeaveCoachEmbed(newChannel);
+            }
+        } catch { }
     }
 
     private extractChannelProperties(channel: TextChannel) {
@@ -177,7 +179,7 @@ export class NukeService {
                 pendingNukes.delete(messageId);
                 try {
                     await message.delete();
-                } catch {}
+                } catch { }
             }
         }, 30000);
     }

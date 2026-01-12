@@ -1,9 +1,9 @@
-import { Training, Team, MatchBracket, POINTS } from './types';
+import { Training, Team, MatchBracket, POINTS, TrainingType } from './types';
 import { RankingService } from '../ranking/RankingService';
 import { mvpService } from '../mvp/MvpService';
 import { captainsRepository } from '../captains/CaptainsRepository';
 import { Client, Guild, TextChannel, VoiceChannel } from 'discord.js';
-import { CHANNEL_IDS } from '../../config';
+import { CHANNEL_IDS, channelConfig, EMOJIS } from '../../config';
 import { TEAM_VOICE_CHANNELS } from './constants';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,6 +18,10 @@ export class TrainingService {
     private pendingSwap: Map<string, { playerId: string; teamId: number }> = new Map();
     private memberNameCache: Map<string, { name: string; timestamp: number }> = new Map();
     private readonly CACHE_TTL = 5 * 60 * 1000;
+    private saveLock: boolean = false;
+    private pendingSave: boolean = false;
+    private pendingEmbedUpdates: Map<string, NodeJS.Timeout> = new Map();
+    private embedUpdateCallbacks: Map<string, () => Promise<void>> = new Map();
 
     constructor() {
         this.rankingService = new RankingService();
@@ -73,17 +77,20 @@ export class TrainingService {
     private loadTrainings(): void {
         try {
             if (fs.existsSync(TRAININGS_FILE)) {
-                const data = JSON.parse(fs.readFileSync(TRAININGS_FILE, 'utf-8'));
-                const now = Date.now();
-                const MAX_AGE = 24 * 60 * 60 * 1000;
+                const fileContent = fs.readFileSync(TRAININGS_FILE, 'utf-8');
+                const data = JSON.parse(fileContent);
 
+                let loadedCount = 0;
                 for (const [key, value] of Object.entries(data.trainings || {})) {
                     const training = value as Training;
+                    // Só descarta treinos vazios em inscrição
                     if (training.participants.length === 0 && training.status === 'inscricao') {
                         continue;
                     }
                     this.trainings.set(key, training);
+                    loadedCount++;
                 }
+
                 for (const [key, value] of Object.entries(data.pendingTeamCount || {})) {
                     if (this.trainings.has(key)) {
                         this.pendingTeamCount.set(key, value as number);
@@ -94,8 +101,14 @@ export class TrainingService {
                         this.pendingCaptainLimit.set(key, value as number);
                     }
                 }
+
+                if (loadedCount > 0) {
+                    console.log(`[TrainingService] ✅ ${loadedCount} treinos carregados do arquivo`.green);
+                }
             }
-        } catch {}
+        } catch (error) {
+            console.error('[TrainingService] ❌ Erro ao carregar treinos:', error);
+        }
     }
 
     cleanupOldTrainings(): void {
@@ -131,18 +144,43 @@ export class TrainingService {
     }
 
     private saveTrainings(): void {
+        if (this.saveLock) {
+            this.pendingSave = true;
+            return;
+        }
+
+        this.saveLock = true;
+
         try {
             const dir = path.dirname(TRAININGS_FILE);
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });
             }
+            
+            // Filtra treinos válidos para salvar
+            const trainingsToSave = new Map<string, Training>();
+            for (const [id, training] of this.trainings) {
+                // Salva treinos que tem participantes OU que não estão em inscrição
+                if (training.participants.length > 0 || training.status !== 'inscricao') {
+                    trainingsToSave.set(id, training);
+                }
+            }
+
             const data = {
-                trainings: Object.fromEntries(this.trainings),
+                trainings: Object.fromEntries(trainingsToSave),
                 pendingTeamCount: Object.fromEntries(this.pendingTeamCount),
                 pendingCaptainLimit: Object.fromEntries(this.pendingCaptainLimit),
             };
             fs.writeFileSync(TRAININGS_FILE, JSON.stringify(data, null, 2));
-        } catch {}
+        } catch (error) {
+            console.error('[TrainingService] Erro ao salvar trainings:', error);
+        } finally {
+            this.saveLock = false;
+            if (this.pendingSave) {
+                this.pendingSave = false;
+                this.saveTrainings();
+            }
+        }
     }
 
     setPendingTeamCount(messageId: string, count: number): void {
@@ -181,7 +219,7 @@ export class TrainingService {
         return teamCount * limit;
     }
 
-    createTraining(messageId: string): Training {
+    createTraining(messageId: string, type: TrainingType = 'normal'): Training {
         this.cleanupOldTrainings();
         
         const training: Training = {
@@ -193,10 +231,12 @@ export class TrainingService {
             highlights: [],
             status: 'inscricao',
             createdAt: Date.now(),
+            type,
         };
 
         this.trainings.set(messageId, training);
-        this.saveTrainings();
+        // Não salva treino vazio - será salvo quando tiver participantes
+        console.log(`[TrainingService] Treino ${type} criado: ${messageId}`);
         return training;
     }
 
@@ -227,6 +267,55 @@ export class TrainingService {
         }
     }
 
+    // Debounce para atualização do embed - junta múltiplos cliques em uma única atualização
+    scheduleEmbedUpdate(messageId: string, updateFn: () => Promise<void>): void {
+        // Cancela update anterior se existir
+        const existingTimeout = this.pendingEmbedUpdates.get(messageId);
+        if (existingTimeout) {
+            clearTimeout(existingTimeout);
+        }
+
+        // Guarda a função mais recente (com estado atualizado)
+        this.embedUpdateCallbacks.set(messageId, updateFn);
+
+        // Agenda nova atualização para 300ms depois
+        const timeout = setTimeout(async () => {
+            this.pendingEmbedUpdates.delete(messageId);
+            const callback = this.embedUpdateCallbacks.get(messageId);
+            this.embedUpdateCallbacks.delete(messageId);
+            
+            if (callback) {
+                try {
+                    await callback();
+                } catch (error) {
+                    console.error('[TrainingService] Erro no debounced embed update:', error);
+                }
+            }
+        }, 300);
+
+        this.pendingEmbedUpdates.set(messageId, timeout);
+    }
+
+    // Força atualização imediata (cancela debounce)
+    async flushEmbedUpdate(messageId: string): Promise<void> {
+        const existingTimeout = this.pendingEmbedUpdates.get(messageId);
+        if (existingTimeout) {
+            clearTimeout(existingTimeout);
+            this.pendingEmbedUpdates.delete(messageId);
+        }
+
+        const callback = this.embedUpdateCallbacks.get(messageId);
+        this.embedUpdateCallbacks.delete(messageId);
+
+        if (callback) {
+            try {
+                await callback();
+            } catch (error) {
+                console.error('[TrainingService] Erro no flush embed update:', error);
+            }
+        }
+    }
+
     addParticipant(messageId: string, playerId: string): boolean {
         const training = this.trainings.get(messageId);
         if (!training || training.status !== 'inscricao') return false;
@@ -234,6 +323,7 @@ export class TrainingService {
         if (!training.participants.includes(playerId)) {
             training.participants.push(playerId);
             this.saveTrainings();
+            console.log(`[TrainingService] Participante adicionado: ${playerId} (total: ${training.participants.length})`);
             return true;
         }
         return false;
@@ -533,6 +623,48 @@ export class TrainingService {
                 brackets.push({ team1: -3, team2: -1, phase: 'Semifinal 2' });
                 brackets.push({ team1: -4, team2: -5, phase: 'Final' });
                 break;
+            case 7:
+                // 7 times: 1 bye na primeira rodada
+                brackets.push({ team1: teamIds[0], team2: teamIds[1], phase: 'Quartas 1' });
+                brackets.push({ team1: teamIds[2], team2: teamIds[3], phase: 'Quartas 2' });
+                brackets.push({ team1: teamIds[4], team2: teamIds[5], phase: 'Quartas 3' });
+                brackets.push({ team1: -1, team2: teamIds[6], phase: 'Semifinal 1' });
+                brackets.push({ team1: -2, team2: -3, phase: 'Semifinal 2' });
+                brackets.push({ team1: -4, team2: -5, phase: 'Final' });
+                break;
+            case 8:
+                // 8 times: quartas completas
+                brackets.push({ team1: teamIds[0], team2: teamIds[1], phase: 'Quartas 1' });
+                brackets.push({ team1: teamIds[2], team2: teamIds[3], phase: 'Quartas 2' });
+                brackets.push({ team1: teamIds[4], team2: teamIds[5], phase: 'Quartas 3' });
+                brackets.push({ team1: teamIds[6], team2: teamIds[7], phase: 'Quartas 4' });
+                brackets.push({ team1: -1, team2: -2, phase: 'Semifinal 1' });
+                brackets.push({ team1: -3, team2: -4, phase: 'Semifinal 2' });
+                brackets.push({ team1: -5, team2: -6, phase: 'Final' });
+                break;
+            case 9:
+                // 9 times: 1 play-in para reduzir a 8, depois quartas normais
+                brackets.push({ team1: teamIds[0], team2: teamIds[1], phase: 'Play-in' });
+                brackets.push({ team1: -1, team2: teamIds[2], phase: 'Quartas 1' });
+                brackets.push({ team1: teamIds[3], team2: teamIds[4], phase: 'Quartas 2' });
+                brackets.push({ team1: teamIds[5], team2: teamIds[6], phase: 'Quartas 3' });
+                brackets.push({ team1: teamIds[7], team2: teamIds[8], phase: 'Quartas 4' });
+                brackets.push({ team1: -2, team2: -3, phase: 'Semifinal 1' });
+                brackets.push({ team1: -4, team2: -5, phase: 'Semifinal 2' });
+                brackets.push({ team1: -6, team2: -7, phase: 'Final' });
+                break;
+            case 10:
+                // 10 times: 2 play-ins para reduzir a 8, depois quartas normais
+                brackets.push({ team1: teamIds[0], team2: teamIds[1], phase: 'Play-in 1' });
+                brackets.push({ team1: teamIds[2], team2: teamIds[3], phase: 'Play-in 2' });
+                brackets.push({ team1: -1, team2: teamIds[4], phase: 'Quartas 1' });
+                brackets.push({ team1: -2, team2: teamIds[5], phase: 'Quartas 2' });
+                brackets.push({ team1: teamIds[6], team2: teamIds[7], phase: 'Quartas 3' });
+                brackets.push({ team1: teamIds[8], team2: teamIds[9], phase: 'Quartas 4' });
+                brackets.push({ team1: -3, team2: -4, phase: 'Semifinal 1' });
+                brackets.push({ team1: -5, team2: -6, phase: 'Semifinal 2' });
+                brackets.push({ team1: -7, team2: -8, phase: 'Final' });
+                break;
         }
 
         return brackets;
@@ -719,7 +851,8 @@ export class TrainingService {
             username = member.displayName || member.user.username;
         } catch {}
 
-        await mvpService.addMvp(playerId, username, client);
+        // Usa o tipo do treino para adicionar MVP no ranking correto
+        await mvpService.addMvp(playerId, username, client, training.type || 'normal');
 
         return true;
     }
@@ -728,22 +861,27 @@ export class TrainingService {
         const training = this.trainings.get(messageId);
         if (!training || !training.champion) return;
 
+        const trainingType = training.type || 'normal';
+
         const championTeam = training.teams.find(t => t.id === training.champion);
         if (championTeam) {
             championTeam.players.forEach(playerId => {
-                this.rankingService.addWinnerPoints([playerId]);
+                this.rankingService.addWinnerPoints([playerId], trainingType);
             });
         }
 
         training.highlights.forEach(playerId => {
-            this.rankingService.addPoints(playerId, POINTS.HIGHLIGHT);
+            this.rankingService.addPoints(playerId, POINTS.HIGHLIGHT, trainingType);
         });
 
         if (training.mvpId) {
-            this.rankingService.addPoints(training.mvpId, POINTS.MVP);
+            this.rankingService.addPoints(training.mvpId, POINTS.MVP, trainingType);
         }
 
         await this.sendTrainingSummary(training, guild, client);
+
+        // Atualiza o ranking no canal após finalizar o treino
+        await this.rankingService.sendRankingUpdate(client, trainingType);
 
         this.trainings.delete(messageId);
         this.pendingTeamCount.delete(messageId);
@@ -753,11 +891,21 @@ export class TrainingService {
     }
 
     private async sendTrainingSummary(training: Training, guild: Guild, client: Client): Promise<void> {
-        const channel = await client.channels.fetch(CHANNEL_IDS.TREINO_RESUMO) as TextChannel;
+        // Usa o canal correto baseado no tipo de treino
+        const channelId = training.type === 'feminino' 
+            ? channelConfig.rankingFeminino?.treinoResumoChannelId 
+            : CHANNEL_IDS.TREINO_RESUMO;
+        
+        if (!channelId) return;
+        
+        const channel = await client.channels.fetch(channelId) as TextChannel;
         if (!channel) return;
 
         const playersPerTeam = training.teams[0]?.players.length || 0;
         const matchType = `${playersPerTeam}V${playersPerTeam}`;
+        const isFeminino = training.type === 'feminino';
+        const tipoLabel = isFeminino ? 'FEMININO' : 'AUGE';
+        const titleEmoji = isFeminino ? EMOJIS.LACO_ROSA : '🏆';
 
         const teamEmojis = ['⚫', '⚪', '⚫', '⚪', '⚫', '⚪'];
 
@@ -798,8 +946,10 @@ export class TrainingService {
         let matchesText = '';
 
         for (const [phaseName, brackets] of phases) {
-            const isFinal = phaseName === 'Final';
-            const separator = isFinal ? '───── 🔥 FINAL ─────' : `───── ⚔️ ${phaseName.toUpperCase()}S ─────`;
+            const isFinalMatch = phaseName === 'Final';
+            const finalEmoji = isFeminino ? EMOJIS.LACO_ROSA : '🔥';
+            const phaseEmoji = isFeminino ? EMOJIS.PONTO_ROSA : '⚔️';
+            const separator = isFinalMatch ? `───── ${finalEmoji} FINAL ─────` : `───── ${phaseEmoji} ${phaseName.toUpperCase()}S ─────`;
             matchesText += `\n${separator}\n\n`;
 
             for (const bracket of brackets) {
@@ -808,7 +958,7 @@ export class TrainingService {
                 const winnerTeam = training.teams.find(t => t.id === bracket.winner);
 
                 const phaseLabel = brackets.length > 1 ? `**${bracket.phase.replace(phaseName, '').trim() || phaseName}** • ` : '';
-                const winEmoji = isFinal ? '👑' : '✅';
+                const winEmoji = isFinalMatch ? (isFeminino ? EMOJIS.LACO_ROSA : '👑') : '✅';
 
                 matchesText += `${phaseLabel}${team1?.name || '?'} vs ${team2?.name || '?'} → **${winnerTeam?.name || '?'}** ${winEmoji}\n`;
             }
@@ -816,19 +966,24 @@ export class TrainingService {
 
         const championTeam = training.teams.find(t => t.id === training.champion);
 
-        let premiacaoText = '\n───── 🏅 PREMIAÇÃO ─────\n\n';
-        premiacaoText += `👑 Campeão: **${championTeam?.name || '?'}**\n`;
+        const premiacaoEmoji = isFeminino ? EMOJIS.LACO_ROSA : '🏅';
+        const champEmoji = isFeminino ? EMOJIS.LACO_ROSA : '👑';
+        const mvpEmoji = isFeminino ? EMOJIS.PONTO_ROSA : '⭐';
+        const destaquesEmoji = isFeminino ? EMOJIS.PONTO_ROSA : '🎖️';
+
+        let premiacaoText = `\n───── ${premiacaoEmoji} PREMIAÇÃO ─────\n\n`;
+        premiacaoText += `${champEmoji} Campeão: **${championTeam?.name || '?'}**\n`;
         
         if (training.mvpId) {
-            premiacaoText += `⭐ MVP: <@${training.mvpId}>\n`;
+            premiacaoText += `${mvpEmoji} MVP: <@${training.mvpId}>\n`;
         }
 
         if (training.highlights.length > 0) {
             const highlightMentions = training.highlights.map(id => `<@${id}>`).join(' ');
-            premiacaoText += `🎖️ Destaques: ${highlightMentions}\n`;
+            premiacaoText += `${destaquesEmoji} Destaques: ${highlightMentions}\n`;
         }
 
-        const summaryText = `# 🏆 TREINO ${matchType} AUGE\n\n${teamsText}${matchesText}${premiacaoText}`;
+        const summaryText = `# ${titleEmoji} TREINO ${matchType} ${tipoLabel}\n\n${teamsText}${matchesText}${premiacaoText}`;
 
         await channel.send(summaryText);
     }

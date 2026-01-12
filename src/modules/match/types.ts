@@ -12,6 +12,8 @@ export interface MatchBracket {
     roomCode?: string;
 }
 
+export type TrainingType = 'normal' | 'feminino';
+
 export interface Training {
     messageId: string;
     participants: string[];
@@ -25,6 +27,7 @@ export interface Training {
     selectedCaptains?: string[];
     status: 'inscricao' | 'sorteio' | 'andamento' | 'finalizado';
     createdAt?: number;
+    type: TrainingType;
 }
 
 export const POINTS = {
