@@ -179,6 +179,20 @@ export class CoachService {
                 }
             }
 
+            if (coach.roleId) {
+                const apprenticeRole = await guild.roles.fetch(coach.roleId).catch(() => null);
+                if (apprenticeRole) {
+                    await apprenticeRole.delete().catch(() => { });
+                }
+            }
+
+            if (coach.channelId) {
+                const trainingChannel = await guild.channels.fetch(coach.channelId).catch(() => null);
+                if (trainingChannel) {
+                    await trainingChannel.delete().catch(() => { });
+                }
+            }
+
             if (client) {
                 await this.removeCoachDisplayEmbed(client, coach);
             }
