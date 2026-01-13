@@ -69,6 +69,21 @@ export class CoachButtonBuilder {
         });
     }
 
+    static buildTicketButtons(): ActionRowBuilder<ButtonBuilder> {
+        return new ActionRowBuilder<ButtonBuilder>({
+            components: [
+                new ButtonBuilder()
+                    .setCustomId(COACH_CUSTOM_IDS.START_FORM_BUTTON)
+                    .setLabel(COACH_MESSAGES.START_FORM_BUTTON)
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId(COACH_CUSTOM_IDS.CLOSE_TICKET_BUTTON)
+                    .setLabel(COACH_MESSAGES.CLOSE_TICKET_BUTTON)
+                    .setStyle(ButtonStyle.Danger),
+            ],
+        });
+    }
+
     static buildAcceptRejectButtons(requestId: string): ActionRowBuilder<ButtonBuilder> {
         return new ActionRowBuilder<ButtonBuilder>({
             components: [

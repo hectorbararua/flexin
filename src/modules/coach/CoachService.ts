@@ -370,13 +370,12 @@ export class CoachService {
             await coachRepository.createRequest(request);
 
             const welcomeEmbed = CoachEmbedBuilder.buildTicketWelcomeEmbed(interaction.user.username);
-            const startButton = CoachButtonBuilder.buildStartFormButton();
-            const closeButton = CoachButtonBuilder.buildCloseTicketButton();
+            const ticketButtons = CoachButtonBuilder.buildTicketButtons();
 
             await ticketThread.send({
                 content: `<@${interaction.user.id}>`,
                 embeds: [welcomeEmbed],
-                components: [startButton, closeButton],
+                components: [ticketButtons],
             });
 
             await interaction.editReply({ content: `✅ Ticket criado! Vá para ${ticketThread} para preencher o formulário.` });
@@ -693,6 +692,14 @@ export class CoachService {
             await interaction.deferReply();
 
             const channel = interaction.channel;
+            const channelId = channel?.id;
+
+            if (channelId) {
+                const request = coachRepository.getRequestByTicketChannelId(channelId);
+                if (request) {
+                    await coachRepository.deleteRequest(request.id);
+                }
+            }
 
             await interaction.editReply({
                 content: `🔒 **Ticket finalizado por** <@${interaction.user.id}>!\n\n*Esta thread será excluída em 3 segundos...*`,
