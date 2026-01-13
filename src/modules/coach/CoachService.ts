@@ -366,11 +366,12 @@ export class CoachService {
 
             const welcomeEmbed = CoachEmbedBuilder.buildTicketWelcomeEmbed(interaction.user.username);
             const startButton = CoachButtonBuilder.buildStartFormButton();
+            const closeButton = CoachButtonBuilder.buildCloseTicketButton();
 
             await ticketThread.send({
                 content: `<@${interaction.user.id}>`,
                 embeds: [welcomeEmbed],
-                components: [startButton],
+                components: [startButton, closeButton],
             });
 
             await interaction.editReply({ content: `✅ Ticket criado! Vá para ${ticketThread} para preencher o formulário.` });
