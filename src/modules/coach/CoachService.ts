@@ -295,8 +295,13 @@ export class CoachService {
 
             const existingRequest = coachRepository.getRequestByUserId(interaction.user.id);
             if (existingRequest) {
-                await interaction.editReply({ content: '❌ Você já possui uma solicitação pendente. Aguarde ser aceito por um treinador.' });
-                return;
+                const ticketChannel = await guild.channels.fetch(existingRequest.ticketChannelId).catch(() => null);
+                if (!ticketChannel) {
+                    await coachRepository.deleteRequest(existingRequest.id);
+                } else {
+                    await interaction.editReply({ content: '❌ Você já possui uma solicitação pendente. Aguarde ser aceito por um treinador.' });
+                    return;
+                }
             }
 
             const currentCoach = coachRepository.getCoachByStudent(interaction.user.id);
