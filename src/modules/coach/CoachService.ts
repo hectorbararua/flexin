@@ -328,21 +328,6 @@ export class CoachService {
 
             await ticketThread.members.add(interaction.user.id);
 
-            const staffRole = guild.roles.cache.get(COACH_ROLE_IDS.STAFF);
-            const coachRole = guild.roles.cache.get(COACH_ROLE_IDS.COACH);
-
-            if (staffRole) {
-                for (const [, member] of staffRole.members) {
-                    await ticketThread.members.add(member.id).catch(() => { });
-                }
-            }
-
-            if (coachRole) {
-                for (const [, member] of coachRole.members) {
-                    await ticketThread.members.add(member.id).catch(() => { });
-                }
-            }
-
             const userInfo = extractUserInfo(interaction.user);
             const requestId = generateRequestId();
             const request: StudentRequest = {
@@ -379,6 +364,26 @@ export class CoachService {
             });
 
             await interaction.editReply({ content: `✅ Ticket criado! Vá para ${ticketThread} para preencher o formulário.` });
+
+            const staffRole = guild.roles.cache.get(COACH_ROLE_IDS.STAFF);
+            const coachRole = guild.roles.cache.get(COACH_ROLE_IDS.COACH);
+            const memberIds = new Set<string>();
+
+            if (staffRole) {
+                for (const [, member] of staffRole.members) {
+                    memberIds.add(member.id);
+                }
+            }
+
+            if (coachRole) {
+                for (const [, member] of coachRole.members) {
+                    memberIds.add(member.id);
+                }
+            }
+
+            Promise.all(
+                Array.from(memberIds).map(id => ticketThread.members.add(id).catch(() => { }))
+            ).catch(() => { });
         } catch {
             await interaction.editReply({ content: '❌ Erro ao criar ticket.' }).catch(() => { });
         }

@@ -11,6 +11,3 @@ export {
     handleProfilePlatformSelect,
     handleProfileAvailabilitySelect,
 } from './CoachCommand';
-
-
-
