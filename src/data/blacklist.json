@@ -25,5 +25,32 @@
     "bannedBy": "848398230378250261",
     "bannedByUsername": "z0l",
     "bannedAt": "2025-12-30T21:30:35.540Z"
+  },
+  "1300522828399120459": {
+    "odId": "1300522828399120459",
+    "odUsername": "sxkh6",
+    "odAvatar": "https://cdn.discordapp.com/avatars/1300522828399120459/7ad13a0b36898a941e1581e35475b883.png?size=128",
+    "reason": "amiga de jack",
+    "bannedBy": "1452866261259255901",
+    "bannedByUsername": "darqw",
+    "bannedAt": "2026-01-13T21:01:25.567Z"
+  },
+  "1294008637055828079": {
+    "odId": "1294008637055828079",
+    "odUsername": "homenmaisfiel",
+    "odAvatar": "https://cdn.discordapp.com/avatars/1294008637055828079/12a18b64ad2a7d5e8d2f6bc18d55e5ff.png?size=128",
+    "reason": "jack",
+    "bannedBy": "1452866261259255901",
+    "bannedByUsername": "darqw",
+    "bannedAt": "2026-01-13T21:01:59.239Z"
+  },
+  "576100181544796206": {
+    "odId": "576100181544796206",
+    "odUsername": "karmo_s",
+    "odAvatar": "https://cdn.discordapp.com/avatars/576100181544796206/5087ba1de8b29a8f7c386ba67ff91174.png?size=128",
+    "reason": "Jack 2.0",
+    "bannedBy": "1452866261259255901",
+    "bannedByUsername": "darqw",
+    "bannedAt": "2026-01-14T01:23:38.611Z"
   }
 }

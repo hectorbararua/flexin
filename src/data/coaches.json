@@ -1,15 +1,220 @@
 {
   "coaches": {
-    "848398230378250261": {
-      "id": "848398230378250261",
-      "odUserId": "848398230378250261",
-      "username": "z0l",
-      "displayName": "yex",
-      "roleId": "1460439187386925202",
-      "channelId": "1460439188972376259",
+    "1452866261259255901": {
+      "id": "1452866261259255901",
+      "odUserId": "1452866261259255901",
+      "username": "darqw",
+      "displayName": "darq",
+      "roleId": "1460827888852144309",
+      "channelId": "1460827890328535178",
       "studentIds": [],
-      "createdAt": "2026-01-13T01:03:56.816Z",
-      "createdBy": "848398230378250261"
+      "createdAt": "2026-01-14T02:48:30.477Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "equilibrado"
+        ],
+        "teachingStyle": "calmo",
+        "main": "Saito",
+        "platform": "pc",
+        "availability": [
+          "tarde",
+          "noite",
+          "madrugada"
+        ]
+      }
+    },
+    "635999135022972948": {
+      "id": "635999135022972948",
+      "odUserId": "635999135022972948",
+      "username": "pippao",
+      "displayName": "Pippo",
+      "roleId": "1460827919361249444",
+      "channelId": "1460827922255450276",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:48:38.863Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "equilibrado",
+          "agressivo"
+        ],
+        "teachingStyle": "direto",
+        "main": "Keilo",
+        "platform": "pc",
+        "availability": [
+          "tarde",
+          "noite",
+          "madrugada"
+        ]
+      }
+    },
+    "896221172503568467": {
+      "id": "896221172503568467",
+      "odUserId": "896221172503568467",
+      "username": "vt1xz",
+      "displayName": "junin",
+      "roleId": "1460827974264946689",
+      "channelId": "1460827976332480615",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:48:51.070Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo"
+        ],
+        "teachingStyle": "rigido",
+        "main": "saito",
+        "platform": "pc",
+        "availability": [
+          "noite",
+          "madrugada"
+        ]
+      }
+    },
+    "1363529846197846268": {
+      "id": "1363529846197846268",
+      "odUserId": "1363529846197846268",
+      "username": "nycolasborsato",
+      "displayName": "Nyc",
+      "roleId": "1460828008720896137",
+      "channelId": "1460828010444882229",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:48:59.081Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "passivo",
+          "equilibrado",
+          "clutch"
+        ],
+        "teachingStyle": "direto",
+        "main": "Saito, e as vezes keilo e gazo",
+        "platform": "pc",
+        "availability": [
+          "madrugada",
+          "tarde"
+        ]
+      }
+    },
+    "433736427461672960": {
+      "id": "433736427461672960",
+      "odUserId": "433736427461672960",
+      "username": "lari__b",
+      "displayName": "! skyy",
+      "roleId": "1460828170696527994",
+      "channelId": "1460828172299014369",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:49:38.115Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo"
+        ],
+        "teachingStyle": "calmo",
+        "main": "Keilo",
+        "platform": "pc",
+        "availability": [
+          "tarde"
+        ]
+      }
+    },
+    "1374529244620787823": {
+      "id": "1374529244620787823",
+      "odUserId": "1374529244620787823",
+      "username": "._s0me1",
+      "displayName": "Black",
+      "roleId": "1460828289772949638",
+      "channelId": "1460828291987537933",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:50:06.413Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo"
+        ],
+        "teachingStyle": "rigido",
+        "main": "keilo",
+        "platform": "pc",
+        "availability": [
+          "manha",
+          "tarde",
+          "noite",
+          "madrugada"
+        ]
+      }
+    },
+    "1376742140364980257": {
+      "id": "1376742140364980257",
+      "odUserId": "1376742140364980257",
+      "username": "ztz6",
+      "displayName": "Vento",
+      "roleId": "1460828307179175976",
+      "channelId": "1460828308924272721",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:50:10.442Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo",
+          "clutch"
+        ],
+        "teachingStyle": "motivador",
+        "main": "Saito",
+        "platform": "pc",
+        "availability": [
+          "tarde",
+          "noite",
+          "madrugada"
+        ]
+      }
+    },
+    "645683939352248320": {
+      "id": "645683939352248320",
+      "odUserId": "645683939352248320",
+      "username": "iammyh",
+      "displayName": "Myh",
+      "roleId": "1460830415022723247",
+      "channelId": "1460830418788946124",
+      "studentIds": [],
+      "createdAt": "2026-01-14T02:58:33.236Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo"
+        ],
+        "teachingStyle": "motivador",
+        "main": "Keilo",
+        "platform": "pc",
+        "availability": [
+          "tarde",
+          "noite"
+        ]
+      }
+    },
+    "904264203685208084": {
+      "id": "904264203685208084",
+      "odUserId": "904264203685208084",
+      "username": "kkj2",
+      "displayName": "! raze",
+      "roleId": "1460832782711390250",
+      "channelId": "1460832784179396851",
+      "studentIds": [],
+      "createdAt": "2026-01-14T03:07:57.208Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "equilibrado",
+          "agressivo",
+          "clutch"
+        ],
+        "teachingStyle": "rigido",
+        "main": "KEILO",
+        "platform": "pc",
+        "availability": [
+          "tarde"
+        ]
+      }
     }
   },
   "requests": {}
