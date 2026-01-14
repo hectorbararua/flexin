@@ -31,7 +31,12 @@
       "displayName": "Pippo",
       "roleId": "1460827919361249444",
       "channelId": "1460827922255450276",
-      "studentIds": [],
+      "studentIds": [
+        "1271581999257092217",
+        "1396217267607306392",
+        "1097321170270965780",
+        "1043693611704918136"
+      ],
       "createdAt": "2026-01-14T02:48:38.863Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -56,7 +61,10 @@
       "displayName": "junin",
       "roleId": "1460827974264946689",
       "channelId": "1460827976332480615",
-      "studentIds": [],
+      "studentIds": [
+        "1058483252811272252",
+        "1305003583317475381"
+      ],
       "createdAt": "2026-01-14T02:48:51.070Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -79,7 +87,16 @@
       "displayName": "Nyc",
       "roleId": "1460828008720896137",
       "channelId": "1460828010444882229",
-      "studentIds": [],
+      "studentIds": [
+        "1108105079199895593",
+        "1423204492228169778",
+        "1305003583317475381",
+        "256483884408111105",
+        "1325853301186760770",
+        "517826101179842575",
+        "1275843944827064402",
+        "803988906050846799"
+      ],
       "createdAt": "2026-01-14T02:48:59.081Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -104,7 +121,12 @@
       "displayName": "! skyy",
       "roleId": "1460828170696527994",
       "channelId": "1460828172299014369",
-      "studentIds": [],
+      "studentIds": [
+        "1043562421912092753",
+        "1337964329974239306",
+        "1124595993829199922",
+        "1266516532767490171"
+      ],
       "createdAt": "2026-01-14T02:49:38.115Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -126,7 +148,14 @@
       "displayName": "Black",
       "roleId": "1460828289772949638",
       "channelId": "1460828291987537933",
-      "studentIds": [],
+      "studentIds": [
+        "1460008537680773294",
+        "735137674549002243",
+        "1219172644235251843",
+        "1128090249499791492",
+        "1266187235598798879",
+        "1316005549720211478"
+      ],
       "createdAt": "2026-01-14T02:50:06.413Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -151,7 +180,9 @@
       "displayName": "Vento",
       "roleId": "1460828307179175976",
       "channelId": "1460828308924272721",
-      "studentIds": [],
+      "studentIds": [
+        "1153038219705860207"
+      ],
       "createdAt": "2026-01-14T02:50:10.442Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -199,7 +230,10 @@
       "displayName": "! raze",
       "roleId": "1460832782711390250",
       "channelId": "1460832784179396851",
-      "studentIds": [],
+      "studentIds": [
+        "773646602098311198",
+        "1057348123195867228"
+      ],
       "createdAt": "2026-01-14T03:07:57.208Z",
       "createdBy": "1154112118480703668",
       "profile": {
@@ -215,7 +249,590 @@
           "tarde"
         ]
       }
+    },
+    "766518210832891924": {
+      "id": "766518210832891924",
+      "odUserId": "766518210832891924",
+      "username": "luarajj",
+      "displayName": "moonlight",
+      "roleId": "1460837640596099236",
+      "channelId": "1460837649890803734",
+      "studentIds": [
+        "1324795075342893140",
+        "1207443365646434315",
+        "1441250837627277332",
+        "1283215280914305025",
+        "1123813820519944282",
+        "1444371967472959591",
+        "1166347565575442435"
+      ],
+      "createdAt": "2026-01-14T03:27:17.248Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "passivo"
+        ],
+        "teachingStyle": "calmo",
+        "main": "Keilo",
+        "platform": "pc",
+        "availability": [
+          "noite",
+          "tarde"
+        ]
+      }
+    },
+    "1121922853839831196": {
+      "id": "1121922853839831196",
+      "odUserId": "1121922853839831196",
+      "username": "anwxzz",
+      "displayName": "cuscuz",
+      "roleId": "1460846987418140774",
+      "channelId": "1460846989502844938",
+      "studentIds": [
+        "1147653682142396476",
+        "715916631771185222",
+        "1327110126838218805",
+        "877229611354841199",
+        "829439981583466538",
+        "645683939352248320"
+      ],
+      "createdAt": "2026-01-14T04:04:24.042Z",
+      "createdBy": "1154112118480703668",
+      "profile": {
+        "gameStyle": [
+          "agressivo",
+          "equilibrado"
+        ],
+        "teachingStyle": "calmo",
+        "main": "Keilo",
+        "platform": "pc",
+        "availability": [
+          "tarde"
+        ]
+      }
     }
   },
-  "requests": {}
+  "requests": {
+    "req_1768362881039_70jcbqs": {
+      "id": "req_1768362881039_70jcbqs",
+      "odUserId": "1449106939152961639",
+      "username": "zoiudda",
+      "displayName": "balalaika",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1449106939152961639/dad02085330c9827cfc92a486fe29298.png?size=128",
+      "preferences": {
+        "gameStyle": "clutch",
+        "teachingStyle": "motivador",
+        "platform": "mobile",
+        "fps": "60",
+        "ping": "30ms",
+        "availability": [
+          "noite"
+        ],
+        "experience": "intermediario",
+        "main": "wu",
+        "conexaoInfo": "jogo sem lag, raramente dá lag"
+      },
+      "ticketChannelId": "1460844544403836980",
+      "status": "pending",
+      "createdAt": "2026-01-14T03:54:41.039Z",
+      "messageId": "1460847078950572083"
+    },
+    "req_1768363185830_7n4twkw": {
+      "id": "req_1768363185830_7n4twkw",
+      "odUserId": "1344415339110207589",
+      "username": "soki0492",
+      "displayName": "Soki",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1344415339110207589/aac7551a74eb551e9293e15983061b6b.png?size=128",
+      "preferences": {
+        "gameStyle": "passivo",
+        "teachingStyle": "direto",
+        "platform": "pc",
+        "fps": "60",
+        "ping": "75",
+        "availability": [
+          "madrugada",
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "KAMEKI",
+        "conexaoInfo": "Minha internet cai as vezes por conta do lugar que eu moro, as vezes isso atrapalha bastante, mais tirando isso ela é constante."
+      },
+      "ticketChannelId": "1460845822546546731",
+      "status": "pending",
+      "createdAt": "2026-01-14T03:59:45.830Z",
+      "messageId": "1460848291267739728"
+    },
+    "req_1768363387355_utp30ne": {
+      "id": "req_1768363387355_utp30ne",
+      "odUserId": "1343674299789213726",
+      "username": "rooxxkkj",
+      "displayName": "𐐩  𓈒  Roox  !!   🔮",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1343674299789213726/2ff23701365ca6dd6fee6408299ca16e.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "direto",
+        "platform": "mobile",
+        "fps": "120",
+        "ping": "30-40",
+        "availability": [
+          "tarde",
+          "noite",
+          "madrugada"
+        ],
+        "experience": "avancado",
+        "main": "Keilo",
+        "conexaoInfo": "Jogo na maioria das vezes sem lag"
+      },
+      "ticketChannelId": "1460846667572969697",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:03:07.355Z",
+      "messageId": "1460847204800532601"
+    },
+    "req_1768364433658_ow7f6qs": {
+      "id": "req_1768364433658_ow7f6qs",
+      "odUserId": "1358501901720617212",
+      "username": "hjuliah_63198",
+      "displayName": "𝕵𝖚𝖑𝖎𝖆",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1358501901720617212/d91f23eb1faf07ce4db505283aaf08fa.png?size=128",
+      "preferences": {
+        "gameStyle": "clutch",
+        "teachingStyle": "calmo",
+        "platform": "mobile",
+        "fps": "60",
+        "ping": "80",
+        "availability": [
+          "noite"
+        ],
+        "experience": "intermediario",
+        "main": "Keilo",
+        "conexaoInfo": "Tem vez que laga demais e tem vez que é dboa."
+      },
+      "ticketChannelId": "1460851055553413251",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:20:33.658Z",
+      "messageId": "1460854155580276890"
+    },
+    "req_1768364462553_hcs8h39": {
+      "id": "req_1768364462553_hcs8h39",
+      "odUserId": "1323857387374772277",
+      "username": "mnathy.",
+      "displayName": "愛",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1323857387374772277/b3c5edcaa73f764eda86960891a9dfad.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "motivador",
+        "platform": "mobile",
+        "fps": "60",
+        "ping": "32",
+        "availability": [
+          "tarde",
+          "noite",
+          "madrugada"
+        ],
+        "experience": "intermediario",
+        "main": "Gazo",
+        "conexaoInfo": "Meu jogo costuma ter lag as vezes o Ping vai de 32 a 80/100"
+      },
+      "ticketChannelId": "1460851170515095582",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:21:02.553Z",
+      "messageId": "1460851855985872896"
+    },
+    "req_1768364552278_bg2290n": {
+      "id": "req_1768364552278_bg2290n",
+      "odUserId": "1172235259069354055",
+      "username": "loloh.scx",
+      "displayName": "𝓢𝑡𝑒𝑛",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1172235259069354055/4984d1bf68cec625f304c1337055a908.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "direto",
+        "platform": "mobile",
+        "fps": "30",
+        "ping": "120",
+        "availability": [
+          "manha",
+          "tarde",
+          "madrugada"
+        ],
+        "experience": "intermediario",
+        "main": "Gazo",
+        "conexaoInfo": "Depende do horário, mas muitas vezes o ms e fps acabam baixando e aumentando. Principalmente em Clash."
+      },
+      "ticketChannelId": "1460851554037792919",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:22:32.278Z",
+      "messageId": "1460852424540426241"
+    },
+    "req_1768364612284_4un60bk": {
+      "id": "req_1768364612284_4un60bk",
+      "odUserId": "1202399846355439840",
+      "username": "nanabiruta",
+      "displayName": "⊹ ࣪ ˖ 𝙉𝙖𝙣𝙖 >ᴗ<",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1202399846355439840/75f5ae8e7e181c554291bb07b6352788.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "calmo",
+        "platform": "pc",
+        "fps": "60",
+        "ping": "80",
+        "availability": [
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "Saito",
+        "conexaoInfo": "Ele laga aleatoriamente"
+      },
+      "ticketChannelId": "1460851805717004394",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:23:32.284Z",
+      "messageId": "1460852965194600641"
+    },
+    "req_1768364881555_0h65r04": {
+      "id": "req_1768364881555_0h65r04",
+      "odUserId": "1131368504268959756",
+      "username": "dana_wex",
+      "displayName": "٭ɖɑռɑ",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1131368504268959756/272092938825d5f893b21f485951e17d.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "rigido",
+        "platform": "mobile",
+        "fps": "40",
+        "ping": "60",
+        "availability": [
+          "noite",
+          "tarde",
+          "madrugada"
+        ],
+        "experience": "avancado",
+        "main": "Gazo",
+        "conexaoInfo": "Não laga muito só o fps que fica meio ruim as vezes"
+      },
+      "ticketChannelId": "1460852934702006468",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:28:01.555Z",
+      "messageId": "1460856861527117979"
+    },
+    "req_1768365023865_5wfh338": {
+      "id": "req_1768365023865_5wfh338",
+      "odUserId": "1116773055436431380",
+      "username": "hard0655",
+      "displayName": "Hard",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1116773055436431380/42ebd647cd058eaaedab4a383847dd2a.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "calmo",
+        "platform": "mobile",
+        "fps": "60",
+        "ping": "60",
+        "availability": [
+          "tarde"
+        ],
+        "experience": "avancado",
+        "main": "Não tenho mas uso bastante keilo",
+        "conexaoInfo": "Jogo suave"
+      },
+      "ticketChannelId": "1460853532201844821",
+      "status": "pending",
+      "createdAt": "2026-01-14T04:30:23.865Z",
+      "messageId": "1460854451697877134"
+    },
+    "req_1768367590865_gpfn15s": {
+      "id": "req_1768367590865_gpfn15s",
+      "odUserId": "1361737466666684459",
+      "username": "_love_15",
+      "displayName": "Sleep💤",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1361737466666684459/82c41d8d382efd382dff267e7db9c512.png?size=128",
+      "preferences": {
+        "gameStyle": "clutch",
+        "teachingStyle": "calmo",
+        "platform": "mobile",
+        "fps": "10/40",
+        "ping": "30/200",
+        "availability": [
+          "manha",
+          "tarde",
+          "noite",
+          "madrugada"
+        ],
+        "experience": "iniciante",
+        "main": "Todos",
+        "conexaoInfo": "Jogo com lag de vez em quando mais do quando o servidor tá lotado, ms as vezes sobe bastante mais estamos resolvendo isso"
+      },
+      "ticketChannelId": "1460864299210903655",
+      "status": "pending",
+      "createdAt": "2026-01-14T05:13:10.865Z",
+      "messageId": "1461021125998804994"
+    },
+    "req_1768368408168_umq73i4": {
+      "id": "req_1768368408168_umq73i4",
+      "odUserId": "1221578372677632021",
+      "username": "relampago_gordinho_39211",
+      "displayName": "bolinhofofinho ama molieres",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1221578372677632021/68ec214875c7f6d0f6c2d1c7028bae0f.png?size=128",
+      "preferences": {
+        "gameStyle": "clutch",
+        "teachingStyle": "rigido",
+        "platform": "mobile",
+        "fps": "60 fps",
+        "ping": "30 e 80",
+        "availability": [
+          "madrugada"
+        ],
+        "experience": "intermediario",
+        "main": "denjin, gazo e gloom",
+        "conexaoInfo": "dependendo da internet, meu jogo roda normalmente, sem problemas"
+      },
+      "ticketChannelId": "1460867726561251382",
+      "status": "pending",
+      "createdAt": "2026-01-14T05:26:48.168Z",
+      "messageId": "1460868333954924589"
+    },
+    "req_1768370593758_1m2tx4n": {
+      "id": "req_1768370593758_1m2tx4n",
+      "odUserId": "1308879870884974699",
+      "username": "sylkiiz",
+      "displayName": "✶",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1308879870884974699/8e3515481642fb25025972288b87a68e.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "rigido",
+        "platform": "mobile",
+        "fps": "50-60",
+        "ping": "90-120",
+        "availability": [
+          "madrugada",
+          "noite"
+        ],
+        "experience": "intermediario",
+        "main": "Saito",
+        "conexaoInfo": "Depende do horário"
+      },
+      "ticketChannelId": "1460876893955035138",
+      "status": "pending",
+      "createdAt": "2026-01-14T06:03:13.758Z",
+      "messageId": "1460877793079459997"
+    },
+    "req_1768377483988_v10vwi9": {
+      "id": "req_1768377483988_v10vwi9",
+      "odUserId": "1369668241064067204",
+      "username": "userfile.",
+      "displayName": "Van D Van",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1369668241064067204/05978ebf6540002643d45601c6b07bab.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "rigido",
+        "platform": "pc",
+        "fps": "240",
+        "ping": "70 80",
+        "availability": [
+          "tarde"
+        ],
+        "experience": "avancado",
+        "main": "Gazo y saito",
+        "conexaoInfo": "Mi ms es bueno pero vivo distancia del servido"
+      },
+      "ticketChannelId": "1460905793644789803",
+      "status": "pending",
+      "createdAt": "2026-01-14T07:58:03.988Z",
+      "messageId": "1460906402393362557"
+    },
+    "req_1768381236241_ywct2bl": {
+      "id": "req_1768381236241_ywct2bl",
+      "odUserId": "1431280545588842712",
+      "username": "malumalu_8889_47933",
+      "displayName": "𝑲𝒚𝒓𝒂𝒙...",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1431280545588842712/9f769aa2b890b1d994a979f533f15fa0.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "calmo",
+        "platform": "console",
+        "fps": "60",
+        "ping": "30",
+        "availability": [
+          "manha",
+          "tarde",
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "Saito",
+        "conexaoInfo": "Laga meio que as vezes"
+      },
+      "ticketChannelId": "1460921531310932080",
+      "status": "pending",
+      "createdAt": "2026-01-14T09:00:36.242Z",
+      "messageId": "1460922682785927205"
+    },
+    "req_1768385468390_o3n3je8": {
+      "id": "req_1768385468390_o3n3je8",
+      "odUserId": "1408993792996016296",
+      "username": "williamgabrielcorreafortes",
+      "displayName": "LK®",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1408993792996016296/a5384f8874afb0903fe913d069193757.png?size=128",
+      "preferences": {
+        "gameStyle": "passivo",
+        "teachingStyle": "rigido",
+        "platform": "mobile",
+        "fps": "60 fps",
+        "ping": "60-80 ms",
+        "availability": [
+          "tarde",
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "Saito/keilo são os que eu mais jogo",
+        "conexaoInfo": "Na parte da tarde e meio lagado\nNa parte da noite consigo jogar deboa"
+      },
+      "ticketChannelId": "1460939282662555719",
+      "status": "pending",
+      "createdAt": "2026-01-14T10:11:08.390Z",
+      "messageId": "1460940661174964346"
+    },
+    "req_1768386063813_wedxbl1": {
+      "id": "req_1768386063813_wedxbl1",
+      "odUserId": "937471065159008267",
+      "username": "gustavo15y_xp",
+      "displayName": "Gustavo",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/937471065159008267/a229a550953c33efcf687a9aa9751beb.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "rigido",
+        "platform": "mobile",
+        "fps": "60,30",
+        "ping": "50",
+        "availability": [
+          "tarde"
+        ],
+        "experience": "iniciante",
+        "main": "Keilo",
+        "conexaoInfo": "Sou um pouco lagado"
+      },
+      "ticketChannelId": "1460941777371533334",
+      "status": "pending",
+      "createdAt": "2026-01-14T10:21:03.813Z",
+      "messageId": "1460942367917080618"
+    },
+    "req_1768387601744_jrnpc1m": {
+      "id": "req_1768387601744_jrnpc1m",
+      "odUserId": "1079174016146886818",
+      "username": "gaby098714",
+      "displayName": "♰Ray◥꧁",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1079174016146886818/d401b3b4d9dd42403b0a70cb66bbd0a7.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "motivador",
+        "platform": "mobile",
+        "fps": "50 a 60",
+        "ping": "50 a 90",
+        "availability": [
+          "noite"
+        ],
+        "experience": "intermediario",
+        "main": "Saito",
+        "conexaoInfo": "Tem vezes que lag depende bastante"
+      },
+      "ticketChannelId": "1460948230446645289",
+      "status": "pending",
+      "createdAt": "2026-01-14T10:46:41.744Z",
+      "messageId": "1460949035962863671"
+    },
+    "req_1768390514343_foajyf3": {
+      "id": "req_1768390514343_foajyf3",
+      "odUserId": "791144815651454986",
+      "username": "sosillye",
+      "displayName": "𝐒𝐞𝐥𝐢𝐧𝐢 ♱",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/791144815651454986/aec894ec126aef13554667ab73962232.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "calmo",
+        "platform": "pc",
+        "fps": "120",
+        "ping": "80ms",
+        "availability": [
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "Não tenho",
+        "conexaoInfo": "Depende, se a internet cooperar"
+      },
+      "ticketChannelId": "1460960447090921534",
+      "status": "pending",
+      "createdAt": "2026-01-14T11:35:14.343Z",
+      "messageId": "1460961503703466008"
+    },
+    "req_1768404563062_74ypcgw": {
+      "id": "req_1768404563062_74ypcgw",
+      "odUserId": "1242611813103833120",
+      "username": "coutinho_s2",
+      "displayName": "Coutinho",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1242611813103833120/c3ed8a625892b4b5e96dfaad265de58f.png?size=128",
+      "preferences": {
+        "gameStyle": "equilibrado",
+        "teachingStyle": "calmo",
+        "platform": "pc",
+        "fps": "",
+        "ping": "",
+        "availability": [],
+        "experience": "iniciante",
+        "main": "",
+        "conexaoInfo": ""
+      },
+      "ticketChannelId": "1461019369198063637",
+      "status": "pending",
+      "createdAt": "2026-01-14T15:29:23.062Z"
+    },
+    "req_1768405198826_0nlzfnx": {
+      "id": "req_1768405198826_0nlzfnx",
+      "odUserId": "1102380888429428827",
+      "username": "draken996",
+      "displayName": "Zenith",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/1102380888429428827/e3181d2d0a3696f4111673722d9b2d82.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "direto",
+        "platform": "mobile",
+        "fps": "40 á 80",
+        "ping": "60 á 150",
+        "availability": [
+          "noite",
+          "madrugada"
+        ],
+        "experience": "avancado",
+        "main": "Jiro,denjin,kameki,senshu",
+        "conexaoInfo": "Normalmente jogo um pouco lagado mais depende do lugar em que estou"
+      },
+      "ticketChannelId": "1461022037840494889",
+      "status": "pending",
+      "createdAt": "2026-01-14T15:39:58.826Z",
+      "messageId": "1461022894044741884"
+    },
+    "req_1768416041646_nbamp6d": {
+      "id": "req_1768416041646_nbamp6d",
+      "odUserId": "645683939352248320",
+      "username": "iammyh",
+      "displayName": "Myh",
+      "avatarUrl": "https://cdn.discordapp.com/avatars/645683939352248320/45a2b0da6821b4ac501007b5dd2df196.png?size=128",
+      "preferences": {
+        "gameStyle": "agressivo",
+        "teachingStyle": "direto",
+        "platform": "pc",
+        "fps": "200",
+        "ping": "50ms",
+        "availability": [
+          "tarde",
+          "noite"
+        ],
+        "experience": "avancado",
+        "main": "Keilo",
+        "conexaoInfo": "Um pouco"
+      },
+      "ticketChannelId": "1461067516276113643",
+      "status": "accepted",
+      "createdAt": "2026-01-14T18:40:41.646Z",
+      "messageId": "1461067764490960927",
+      "resolvedAt": "2026-01-14T18:41:52.146Z",
+      "acceptedBy": "1121922853839831196"
+    }
+  }
 }
